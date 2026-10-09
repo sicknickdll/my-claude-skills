@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>GoMenu spot ES</title>
+<style>
+  /* ── Brand tokens: swap these for the verified GoMenu palette ── */
+  :root {
+    --ink: #14110F;
+    --cream: #F5F0E8;
+    --paper: #FFFDF9;
+    --accent: #FF5A1F;
+    --muted: #7A7066;
+    --line: #E9E1D4;
+    --chip: #F1EADF;
+    --display: 'Inter Display', 'Inter', sans-serif;
+    --text: 'Inter', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--ink); }
+  body { font-family: var(--text); color: var(--ink); -webkit-font-smoothing: antialiased; }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--ink); }
+  .abs { position: absolute; left: 0; top: 0; }
+  .mask { overflow: hidden; padding-bottom: 0.12em; margin-bottom: -0.12em; }
+  .mask > * { display: block; }
+
+  /* hook */
+  #hook { left: 80px; top: 640px; z-index: 0; }
+  #hook .line { font-family: var(--display); font-weight: 900; color: var(--cream);
+    letter-spacing: -0.045em; line-height: 0.98; white-space: nowrap; }
+  #hook .acc { color: var(--accent); }
+  #hookSub { margin-top: 56px; font: 500 46px/1.2 var(--text); color: rgba(245,240,232,.62); letter-spacing: -0.01em; }
+
+  #bgPanel { width: 1080px; height: 1920px; background: var(--cream); z-index: 1; }
+
+  /* world / phone */
+  #world { width: 1080px; height: 1920px; z-index: 2; transform-origin: 0 0; }
+  #phone { left: 220px; top: 600px; width: 640px; height: 1300px; border-radius: 92px;
+    background: var(--ink); padding: 18px; }
+  #screen { position: relative; width: 604px; height: 1264px; border-radius: 74px;
+    background: var(--paper); overflow: hidden; }
+  #island { left: 227px; top: 20px; width: 150px; height: 42px; border-radius: 21px; background: var(--ink); }
+  #status { left: 58px; top: 26px; font: 600 26px/1 var(--text); letter-spacing: -0.01em; }
+  #batt { left: 506px; top: 28px; width: 44px; height: 22px; border-radius: 7px; border: 3px solid var(--ink); }
+  #batt::after { content: ''; position: absolute; left: 3px; top: 3px; width: 26px; height: 10px; border-radius: 3px; background: var(--ink); }
+
+  #header { left: 30px; top: 96px; display: flex; align-items: center; gap: 20px; }
+  #avatar { width: 86px; height: 86px; border-radius: 26px; background: var(--accent); color: var(--paper);
+    font: 800 34px/86px var(--display); text-align: center; letter-spacing: -0.03em; }
+  #rname { font: 800 42px/1.05 var(--display); letter-spacing: -0.03em; }
+  #rurl { font: 500 22px/1.4 var(--text); color: var(--muted); }
+
+  #chips { left: 30px; top: 212px; display: flex; gap: 12px; white-space: nowrap; }
+  .chip { font: 600 25px/1 var(--text); padding: 16px 24px; border-radius: 999px; background: var(--chip); letter-spacing: -0.01em; }
+  .chip.on { background: var(--ink); color: var(--paper); }
+
+  .card { left: 24px; width: 556px; height: 184px; background: #fff; border: 2px solid var(--line);
+    border-radius: 30px; overflow: hidden; }
+  .card .food { position: absolute; left: 18px; top: 18px; width: 144px; height: 144px; border-radius: 22px; overflow: hidden; }
+  .card .food svg { display: block; }
+  .card .name { position: absolute; left: 184px; top: 24px; width: 350px; font: 700 30px/1.15 var(--text); letter-spacing: -0.02em; }
+  .card .desc { position: absolute; left: 184px; top: 64px; width: 350px; font: 500 21px/1.3 var(--text); color: var(--muted); }
+  .card .price { position: absolute; left: 184px; top: 116px; font: 800 32px/1 var(--display); letter-spacing: -0.02em;
+    display: flex; align-items: center; height: 46px; padding: 0 14px; margin-left: -14px; border-radius: 14px; }
+  .price .hl { position: absolute; inset: 0; border-radius: 14px; background: var(--accent); transform-origin: 0 50%; }
+  .price .txt { position: relative; display: flex; }
+  .col { display: inline-block; height: 1.1em; overflow: hidden; line-height: 1.1em; }
+  .roll { display: block; }
+  .roll span { display: block; height: 1.1em; }
+  .allergens { position: absolute; left: 18px; top: 184px; display: flex; gap: 10px; }
+  .alg { display: flex; align-items: center; gap: 10px; padding: 9px 18px 9px 10px; border-radius: 999px; background: var(--chip);
+    font: 600 22px/1 var(--text); letter-spacing: -0.01em; }
+  .alg i { width: 34px; height: 34px; border-radius: 50%; background: var(--paper); display: grid; place-items: center; }
+
+  #tap { width: 92px; height: 92px; border-radius: 50%; border: 5px solid var(--ink); z-index: 5; }
+  #tapDot { width: 44px; height: 44px; border-radius: 50%; background: rgba(20,17,15,.22); z-index: 5; }
+
+  /* captions */
+  #capPlate { width: 1080px; height: 584px; background: var(--cream); z-index: 4; }
+  #caps { z-index: 5; }
+  .cap { position: absolute; left: 80px; top: 236px; width: 940px; }
+  .cap .big { font: 900 168px/1 var(--display); letter-spacing: -0.05em; }
+  .cap .big b { color: var(--accent); font-weight: 900; }
+  .cap .sub { margin-top: 18px; font: 500 44px/1.2 var(--text); color: var(--muted); letter-spacing: -0.015em; white-space: nowrap; }
+
+  /* tile / qr */
+  #tile { z-index: 3; border: 0 solid var(--ink); overflow: hidden; }
+  #tileFill { position: absolute; inset: 0; background: var(--accent); }
+  #qrPanel { position: absolute; background: var(--paper); }
+  #qr { position: absolute; }
+  #brackets { z-index: 6; }
+  #brackets div { position: absolute; width: 84px; height: 84px; border: 0 solid var(--ink); }
+  #urlPill { z-index: 6; height: 92px; padding: 0 38px; border-radius: 999px; background: var(--ink); color: var(--cream);
+    font: 600 40px/92px var(--text); letter-spacing: -0.015em; white-space: nowrap; }
+  #urlPill .dim { color: rgba(245,240,232,.55); }
+  #caret { display: inline-block; width: 4px; height: 44px; background: var(--accent); vertical-align: -8px; margin-left: 4px; }
+
+  /* end card */
+  #end { z-index: 7; left: 80px; top: 0; width: 920px; height: 1920px; }
+  #end .row { position: absolute; left: 0; }
+  #word { top: 600px; font: 900 212px/1 var(--display); letter-spacing: -0.06em; color: var(--ink); }
+  #word span { color: var(--paper); }
+  #tag { top: 842px; font: 700 64px/1.1 var(--display); letter-spacing: -0.035em; color: var(--ink); }
+  #priceChip { top: 1010px; padding: 22px 38px; border-radius: 999px; background: var(--ink); color: var(--cream);
+    font: 600 46px/1 var(--text); letter-spacing: -0.02em; white-space: nowrap; }
+  #priceChip b { font-weight: 800; color: var(--accent); }
+  #ctaLbl { font: 600 44px/1 var(--text); letter-spacing: -0.02em; color: rgba(20,17,15,.72); }
+  #cta { font: 900 112px/1.05 var(--display); letter-spacing: -0.05em; color: var(--ink); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <div id="hook" class="abs">
+    <div class="mask"><span class="line" id="h1">¿Necesitas</span></div>
+    <div class="mask"><span class="line" id="h2">un menú</span></div>
+    <div class="mask"><span class="line acc" id="h3">digital?</span></div>
+    <div class="mask"><span id="hookSub">Sin PDFs. Sin imprimir. Sin código.</span></div>
+  </div>
+
+  <div id="bgPanel" class="abs"></div>
+
+  <div id="world" class="abs">
+    <div id="phone" class="abs">
+      <div id="screen">
+        <div id="island" class="abs"></div>
+        <div id="status" class="abs">9:41</div>
+        <div id="batt" class="abs"></div>
+        <div id="header" class="abs">
+          <div id="avatar">LT</div>
+          <div><div id="rname">La Terraza</div><div id="rurl">laterraza.gomenu.click</div></div>
+        </div>
+        <div id="chips" class="abs">
+          <span class="chip">Entrantes</span><span class="chip on">Principales</span><span class="chip">Postres</span><span class="chip">Bebidas</span>
+        </div>
+        <div id="list"></div>
+        <div id="tapDot" class="abs"></div>
+        <div id="tap" class="abs"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tile" class="abs">
+    <div id="tileFill"></div>
+    <div id="qrPanel"><svg id="qr"></svg></div>
+  </div>
+
+  <div id="capPlate" class="abs"></div>
+  <div id="caps" class="abs">
+    <div class="cap" id="c1"><div class="mask"><div class="big">Crea<b>.</b></div></div><div class="mask"><div class="sub">tu carta en minutos, sin código</div></div></div>
+    <div class="cap" id="c2"><div class="mask"><div class="big">Edita<b>.</b></div></div><div class="mask"><div class="sub">precios, fotos y alérgenos al instante</div></div></div>
+    <div class="cap" id="c3"><div class="mask"><div class="big">Comparte<b>.</b></div></div><div class="mask"><div class="sub">con un QR en cada mesa</div></div></div>
+  </div>
+
+  <div id="brackets" class="abs"><div id="bk0"></div><div id="bk1"></div><div id="bk2"></div><div id="bk3"></div></div>
+  <div id="urlPill" class="abs"><span id="urlTxt"></span><span id="caret"></span></div>
+
+  <div id="end" class="abs">
+    <div class="mask row" id="wordM" style="top:600px"><div id="word" style="position:static">Go<span>Menu</span></div></div>
+    <div class="mask row" style="top:842px"><div id="tag" style="position:static">Tu carta digital, en minutos.</div></div>
+    <div class="row" id="priceChip">Desde <b>7,90 €</b>/mes</div>
+    <div class="mask row" style="top:1262px"><div id="ctaLbl">Pruébalo hoy en</div></div>
+    <div class="mask row" style="top:1326px"><div id="cta">gomenu.click&nbsp;→</div></div>
+  </div>
+</div>
+
+<script>
+// ───────────────────────── data ─────────────────────────
+const QR = ["1111111011011010001111111", "1000001010101110001000001", "1011101010001111001011101", "1011101001000101101011101", "1011101011110010101011101", "1000001000101100001000001", "1111111010101010101111111", "0000000001111101000000000", "1001111110111011110010111", "1111010001110111000111110", "0001101011110111000101001", "1010100100101011000101111", "1111001001000110101100001", "1101110010001011000010010", "1100101101000011010011111", "1001110011101110011101101", "1010101110111001111110110", "0000000011110001100010110", "1111111010101110101010001", "1000001011010101100010001", "1011101010110101111110011", "1011101010101100011000011", "1011101001010100110011111", "1000001001011100001110111", "1111111010011100101001001"];
+const URL_TEXT = 'laterraza.gomenu.click';
+
+const FOOD = {
+  burrata: `<svg width="144" height="144" viewBox="0 0 144 144"><rect width="144" height="144" fill="#F6E1D3"/>
+    <circle cx="72" cy="72" r="54" fill="#fff"/>
+    <circle cx="48" cy="58" r="17" fill="#E5432D"/><circle cx="94" cy="56" r="16" fill="#E5432D"/><circle cx="58" cy="98" r="16" fill="#E5432D"/><circle cx="96" cy="94" r="14" fill="#E5432D"/>
+    <circle cx="48" cy="58" r="8" fill="#F27A5E"/><circle cx="94" cy="56" r="7" fill="#F27A5E"/><circle cx="58" cy="98" r="7" fill="#F27A5E"/>
+    <circle cx="74" cy="74" r="24" fill="#FBF8F2"/><circle cx="70" cy="70" r="15" fill="#fff"/>
+    <ellipse cx="102" cy="76" rx="10" ry="5" fill="#3F8E3A" transform="rotate(-30 102 76)"/><ellipse cx="44" cy="80" rx="9" ry="5" fill="#3F8E3A" transform="rotate(25 44 80)"/></svg>`,
+  pasta: `<svg width="144" height="144" viewBox="0 0 144 144"><rect width="144" height="144" fill="#E8EFD6"/>
+    <circle cx="72" cy="72" r="54" fill="#fff"/>
+    <g fill="none" stroke="#9DBB4E" stroke-width="7" stroke-linecap="round">
+      <path d="M72 72 m-30 0 a30 30 0 1 1 60 0 a26 26 0 1 1 -52 0 a22 22 0 1 1 44 0 a17 17 0 1 1 -34 0 a12 12 0 1 1 24 0"/></g>
+    <g fill="none" stroke="#7FA23A" stroke-width="5" stroke-linecap="round"><path d="M48 60 q24 -14 46 6"/><path d="M50 88 q22 12 44 -6"/></g>
+    <circle cx="64" cy="64" r="4" fill="#F3E2B5"/><circle cx="84" cy="80" r="4" fill="#F3E2B5"/><circle cx="76" cy="58" r="3.5" fill="#F3E2B5"/>
+    <ellipse cx="94" cy="44" rx="10" ry="5" fill="#2F7D32" transform="rotate(-20 94 44)"/></svg>`,
+  tacos: `<svg width="144" height="144" viewBox="0 0 144 144"><rect width="144" height="144" fill="#FBEACB"/>
+    <path d="M18 92 a34 34 0 0 1 68 0 z" fill="#F0BF5E"/><path d="M58 104 a34 34 0 0 1 68 0 z" fill="#E9B04A"/>
+    <path d="M26 92 a26 26 0 0 1 52 0 z" fill="#B9552B"/><path d="M66 104 a26 26 0 0 1 52 0 z" fill="#B9552B"/>
+    <circle cx="40" cy="80" r="4" fill="#9B3C8C"/><circle cx="58" cy="76" r="4" fill="#3F8E3A"/><circle cx="50" cy="86" r="3.5" fill="#fff"/>
+    <circle cx="82" cy="92" r="4" fill="#3F8E3A"/><circle cx="98" cy="88" r="4" fill="#9B3C8C"/><circle cx="106" cy="98" r="3.5" fill="#fff"/>
+    <circle cx="112" cy="40" r="14" fill="#9BC53D"/><circle cx="112" cy="40" r="9" fill="#C7E27A"/></svg>`,
+  tiramisu: `<svg width="144" height="144" viewBox="0 0 144 144"><rect width="144" height="144" fill="#EDE2D6"/>
+    <rect x="30" y="38" width="84" height="72" rx="10" fill="#F4E6CF"/>
+    <rect x="30" y="38" width="84" height="18" rx="9" fill="#6E4630"/>
+    <rect x="30" y="70" width="84" height="10" fill="#A9754F"/><rect x="30" y="94" width="84" height="8" fill="#A9754F"/>
+    <circle cx="48" cy="46" r="2.5" fill="#4A2D1E"/><circle cx="72" cy="50" r="2.5" fill="#4A2D1E"/><circle cx="96" cy="45" r="2.5" fill="#4A2D1E"/></svg>`,
+  limonada: `<svg width="144" height="144" viewBox="0 0 144 144"><rect width="144" height="144" fill="#FAF1C0"/>
+    <path d="M46 34 h52 l-7 84 a6 6 0 0 1 -6 6 h-26 a6 6 0 0 1 -6 -6 z" fill="#fff"/>
+    <path d="M50 58 h44 l-5 58 a5 5 0 0 1 -5 5 h-24 a5 5 0 0 1 -5 -5 z" fill="#F5D84A"/>
+    <circle cx="96" cy="40" r="16" fill="#F2C53D"/><circle cx="96" cy="40" r="11" fill="#FBE68C"/>
+    <rect x="76" y="20" width="5" height="50" rx="2.5" fill="#FF5A1F" transform="rotate(14 78 45)"/></svg>`,
+};
+const ICON = {
+  gluten: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#14110F" stroke-width="2" stroke-linecap="round"><path d="M11 21V6"/><path d="M11 9c-3 0-4-2-4-4 2 0 4 1 4 4zM11 9c3 0 4-2 4-4-2 0-4 1-4 4zM11 14c-3 0-4-2-4-4 2 0 4 1 4 4zM11 14c3 0 4-2 4-4-2 0-4 1-4 4z"/></svg>`,
+  milk: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#14110F" stroke-width="2" stroke-linejoin="round"><path d="M11 2C8 7 5.5 10 5.5 13.5a5.5 5.5 0 0 0 11 0C16.5 10 14 7 11 2z"/></svg>`,
+  egg: `<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#14110F" stroke-width="2"><path d="M11 2.5c-3.6 0-6 5.5-6 10a6 6 0 0 0 12 0c0-4.5-2.4-10-6-10z"/></svg>`,
+};
+
+const CARDS = [
+  { food: 'burrata', name: 'Burrata con tomate', desc: 'Tomate de temporada y albahaca', price: '9,50 €' },
+  { food: 'pasta', name: 'Pasta fresca al pesto', desc: 'Albahaca, piñones y parmesano', roll: ['12,50', '11,90'] },
+  { food: 'tacos', name: 'Tacos de cochinita', desc: 'Cebolla morada, cilantro y lima', price: '10,00 €' },
+  { food: 'tiramisu', name: 'Tiramisú de la casa', desc: 'Mascarpone y café', price: '6,50 €' },
+  { food: 'limonada', name: 'Limonada casera', desc: 'Limón, menta y hielo', price: '4,00 €' },
+];
+
+// ───────────────────────── build DOM ─────────────────────────
+const $ = id => document.getElementById(id);
+const list = $('list');
+CARDS.forEach((c, i) => {
+  const el = document.createElement('div');
+  el.className = 'card abs'; el.id = 'card' + i;
+  let price;
+  if (c.roll) {
+    const [a, b] = c.roll;
+    price = '<span class="hl" id="hl"></span><span class="txt">' + [...a].map((ch, k) =>
+      ch === b[k] ? `<span>${ch}</span>` :
+      `<span class="col"><span class="roll" data-roll="1"><span>${ch}</span><span>${b[k]}</span></span></span>`).join('') +
+      '<span>&nbsp;€</span></span>';
+  } else price = `<span class="txt">${c.price.replace(' ', '&nbsp;')}</span>`;
+  el.innerHTML = `<div class="food">${FOOD[c.food]}</div><div class="name">${c.name}</div><div class="desc">${c.desc}</div>
+    <div class="price" ${c.roll ? 'id="rollPrice"' : ''}>${price}</div>` +
+    (c.roll ? `<div class="allergens">
+      <span class="alg" id="al0"><i>${ICON.gluten}</i>Gluten</span>
+      <span class="alg" id="al1"><i>${ICON.milk}</i>Lácteos</span>
+      <span class="alg" id="al2"><i>${ICON.egg}</i>Huevo</span></div>` : '');
+  list.appendChild(el);
+});
+
+// QR svg (ink modules on paper)
+(() => {
+  const n = QR.length, svg = $('qr');
+  let s = '';
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++)
+    if (QR[y][x] === '1') s += `<rect class="m" data-d="${x + y}" x="${x}" y="${y}" width="1.04" height="1.04" fill="#14110F"/>`;
+  svg.setAttribute('viewBox', `0 0 ${n} ${n}`);
+  svg.innerHTML = s;
+})();
+const qrMods = [...document.querySelectorAll('#qr .m')].map(r => [r, +r.dataset.d]);
+const rolls = [...document.querySelectorAll('[data-roll]')];
+
+// ───────────────────────── math ─────────────────────────
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, p) => a + (b - a) * p;
+const prog = (t, t0, d) => clamp((t - t0) / d);
+const eio = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const eout = p => 1 - Math.pow(1 - p, 3);
+const ein = p => p * p * p;
+// closed-form damped spring step response, 0→1 from t0 (tiny overshoot at z≈0.8)
+function spr(t, t0, f = 2.2, z = 0.82) {
+  const x = t - t0; if (x <= 0) return 0;
+  const w = 2 * Math.PI * f, wd = w * Math.sqrt(1 - z * z);
+  return 1 - Math.exp(-z * w * x) * (Math.cos(wd * x) + (z * w / wd) * Math.sin(wd * x));
+}
+const set = (el, css) => { for (const k in css) el.style[k] = css[k]; };
+
+// mask reveal: in on a spring at tin, out (upwards) at tout
+function reveal(el, t, tin, tout = 1e9, f = 2.2) {
+  const pin = spr(t, tin, f, 0.86);
+  const pout = ein(prog(t, tout, 0.28));
+  const y = (1 - pin) * 112 - pout * 112;
+  el.style.transform = `translateY(${y}%)`;
+  el.style.visibility = (t < tin || pout >= 1) ? 'hidden' : 'visible';
+}
+
+// ───────────────────────── timeline ─────────────────────────
+// 120 BPM grid: beat = 0.5 s, bar = 2 s. Cue times are mirrored in music.py.
+const T = { panel: 2.0, phone: 2.42, zoomIn: 5.75, zoomOut: 7.75, wipe: 8.42, morph: 8.72, grow: 10.62, end: 11.0, dur: 14 };
+const PHONE = { x: 220, y: 600, w: 640, h: 1300, r: 92 };
+const QRBOX = { x: 240, y: 620, w: 600, h: 600, r: 64 };
+
+function camera(t) {
+  // base: slow push over scene 2
+  let c = { s: lerp(1, 1.035, eio(prog(t, 2.6, 3.3))), fx: 540, fy: 1250, tx: 540, ty: 1250 };
+  const zoom = { s: 1.42, fx: 540, fy: 600 + 18 + 520, tx: 540, ty: 1052 };
+  const base = { s: 1, fx: 540, fy: 1250, tx: 540, ty: 1250 };
+  const mix = (a, b, p) => ({ s: lerp(a.s, b.s, p), fx: lerp(a.fx, b.fx, p), fy: lerp(a.fy, b.fy, p), tx: lerp(a.tx, b.tx, p), ty: lerp(a.ty, b.ty, p) });
+  if (t > T.zoomIn) c = mix(c, { ...zoom, s: zoom.s + 0.03 * prog(t, 6.4, 1.5) }, eio(prog(t, T.zoomIn, 0.55)));
+  if (t > T.zoomOut) c = mix(c, base, eio(prog(t, T.zoomOut, 0.55)));
+  return c;
+}
+const camApply = (c, x, y) => [c.tx + c.s * (x - c.fx), c.ty + c.s * (y - c.fy)];
+
+function seek(t) {
+  // stage background
+  $('stage').style.background = t < T.grow + 0.4 ? 'var(--ink)' : 'var(--accent)';
+
+  // ── HOOK ──
+  ['h1', 'h2', 'h3'].forEach((id, i) => reveal($(id), t, i * 0.5 - (i ? 0.04 : 0.16), 1.94 + i * 0.05, 2.6));  // line 1 is already mid-slam on frame 0 (cover frame)
+  reveal($('hookSub'), t, 1.46, 2.06);
+  $('hook').style.visibility = t > 2.6 ? 'hidden' : 'visible';
+
+  // ── cream panel rises ──
+  const pp = eio(prog(t, T.panel, 0.48));
+  set($('bgPanel'), { transform: `translateY(${(1 - pp) * 1920}px)`, borderRadius: `${(1 - pp) * 80}px ${(1 - pp) * 80}px 0 0`,
+    visibility: t < T.panel || t > T.grow + 0.4 ? 'hidden' : 'visible' });
+
+  // ── PHONE + camera ──
+  const cam = camera(t);
+  const enter = spr(t, T.phone, 1.5, 0.84);
+  $('world').style.transform = `translate(${cam.tx - cam.s * cam.fx}px, ${cam.ty - cam.s * cam.fy}px) scale(${cam.s})`;
+  $('phone').style.transform = `translateY(${(1 - enter) * 1450}px)`;
+  $('world').style.visibility = (t < T.phone || t > T.morph) ? 'hidden' : 'visible';
+
+  // header / chips
+  const hp = spr(t, 2.72, 2.4);
+  set($('header'), { opacity: clamp(hp * 1.4), transform: `translateY(${(1 - hp) * 24}px)` });
+  document.querySelectorAll('.chip').forEach((c, i) => {
+    const p = spr(t, 2.97 + i * 0.125, 2.8, 0.75);
+    set(c, { opacity: clamp(p * 1.6), transform: `scale(${0.8 + 0.2 * p})`, display: 'inline-block' });
+  });
+
+  // allergen expansion of card 1 (index 1)
+  const ex = spr(t, 7.2, 2.4, 0.86) * 66;
+  CARDS.forEach((c, i) => {
+    const el = $('card' + i);
+    const p = spr(t, 3.46 + i * 0.25, 2.1, 0.84);
+    const y = 300 + i * 200 + (i > 1 ? ex : 0);
+    set(el, { top: y + 'px', height: (184 + (i === 1 ? ex : 0)) + 'px', opacity: clamp(p * 1.5),
+      transform: `translateY(${(1 - p) * 90}px)` });
+  });
+
+  // tap + price roll (card index 1). price box in screen coords: card x24+184-14, y 500+116
+  const tapT = 6.5;
+  const tp = prog(t, tapT, 0.42);
+  const tx = 24 + 170 + 80, ty = 500 + 116 + 23;
+  set($('tap'), { left: tx - 46 + 'px', top: ty - 46 + 'px', opacity: t < tapT ? 0 : (1 - eout(tp)) * 0.9,
+    transform: `scale(${0.5 + 0.8 * eout(tp)})` });
+  const dp = prog(t, tapT - 0.16, 0.5);
+  set($('tapDot'), { left: tx - 22 + 'px', top: ty - 22 + 'px',
+    opacity: t < tapT - 0.16 ? 0 : Math.sin(Math.PI * dp) , transform: `scale(${0.7 + 0.3 * Math.sin(Math.PI * dp)})` });
+  const hlIn = spr(t, 6.5, 2.6, 0.9), hlOut = eio(prog(t, 7.6, 0.3));
+  set($('hl'), { transform: `scaleX(${hlIn})`, opacity: 1 - hlOut });
+  const ink = [20, 17, 15], paper = [255, 253, 249], cm = clamp(hlIn * 2 - 0.6) * (1 - hlOut);
+  $('rollPrice').style.color = `rgb(${ink.map((v, k) => Math.round(lerp(v, paper[k], cm))).join(',')})`;
+  rolls.forEach((r, k) => { r.style.transform = `translateY(${-50 * spr(t, 6.6 + k * 0.125, 2.4, 0.8)}%)`; });
+  [0, 1, 2].forEach(k => {
+    const p = spr(t, 7.22 + k * 0.125, 2.8, 0.74);
+    set($('al' + k), { opacity: clamp(p * 1.6), transform: `scale(${0.6 + 0.4 * p})` });
+  });
+
+  // ── captions ──
+  const caps = [['c1', 2.96, 5.72], ['c2', 5.96, 8.22], ['c3', 8.46, 10.42]];
+  caps.forEach(([id, a, b]) => {
+    const m = $(id).querySelectorAll('.mask > *');
+    reveal(m[0], t, a, b);
+    reveal(m[1], t, a + 0.14, b + 0.03);
+  });
+  $('capPlate').style.visibility = (t > 5.7 && t < 8.6) ? 'visible' : 'hidden';
+
+  // ── TILE: phone screen → QR → full frame ──
+  const tile = $('tile');
+  if (t < T.wipe || t > 13.9 + 1) { tile.style.visibility = 'hidden'; }
+  else {
+    tile.style.visibility = 'visible';
+    // phone rect in stage coords at the wipe (camera at rest)
+    const c0 = camera(Math.min(t, T.morph));
+    const [px, py] = camApply(c0, PHONE.x, PHONE.y);
+    const ph = { x: px, y: py, w: PHONE.w * c0.s, h: PHONE.h * c0.s, r: PHONE.r * c0.s, b: 18 * c0.s };
+    let r = { ...ph };
+    const mp = spr(t, T.morph, 1.7, 0.9);
+    const q = { ...QRBOX, b: 0 };
+    r = { x: lerp(ph.x, q.x, mp), y: lerp(ph.y, q.y, mp), w: lerp(ph.w, q.w, mp), h: lerp(ph.h, q.h, mp), r: lerp(ph.r, q.r, mp), b: lerp(ph.b, 0, clamp(mp * 1.7)) };
+    const gp = eio(prog(t, T.grow, 0.38));
+    r = { x: lerp(r.x, -2, gp), y: lerp(r.y, -2, gp), w: lerp(r.w, 1084, gp), h: lerp(r.h, 1924, gp), r: lerp(r.r, 0, gp), b: r.b };
+    set(tile, { left: r.x + 'px', top: r.y + 'px', width: r.w + 'px', height: r.h + 'px', borderRadius: r.r + 'px',
+      borderWidth: Math.max(0, r.b) + 'px', zIndex: t > T.grow ? 6 : 3 });
+    // accent fill rises inside the phone screen
+    const wp = eio(prog(t, T.wipe, 0.3));
+    $('tileFill').style.clipPath = `inset(${(1 - wp) * 100}% 0 0 0 round ${Math.max(0, r.r - r.b)}px)`;
+    // QR panel
+    const inset = 44, qp = spr(t, 9.0, 2.2, 0.85), qo = 1 - eout(prog(t, T.grow - 0.1, 0.14));
+    const pw = r.w - inset * 2 - 2 * Math.max(0, r.b);
+    set($('qrPanel'), { left: inset + 'px', top: inset + 'px', width: pw + 'px', height: pw + 'px', borderRadius: '30px',
+      opacity: clamp(qp * 1.5) * qo, transform: `scale(${0.88 + 0.12 * qp})`, visibility: t < 9.0 ? 'hidden' : 'visible' });
+    const qpad = 34;
+    set($('qr'), { left: qpad + 'px', top: qpad + 'px', width: (pw - 2 * qpad) + 'px', height: (pw - 2 * qpad) + 'px' });
+    const sweep = (t - 9.06) / 0.45 * 50;
+    qrMods.forEach(([m, d]) => { m.style.opacity = clamp((sweep - d) / 6); });
+  }
+
+  // brackets around QR
+  const bp = spr(t, 9.97, 3, 0.7), bo = t < 9.97 ? 0 : 1 - eout(prog(t, 10.46, 0.16));
+  const pad = 40 + (1 - bp) * 46;
+  const B = { x: QRBOX.x - pad, y: QRBOX.y - pad, w: QRBOX.w + 2 * pad, h: QRBOX.h + 2 * pad };
+  [[B.x, B.y, '10px 0 0 10px', '28px 0 0 0'], [B.x + B.w - 84, B.y, '10px 10px 0 0', '0 28px 0 0'],
+   [B.x, B.y + B.h - 84, '0 0 10px 10px', '0 0 0 28px'], [B.x + B.w - 84, B.y + B.h - 84, '0 10px 10px 0', '0 0 28px 0']]
+    .forEach(([x, y, bw, br], i) => set($('bk' + i), { left: x + 'px', top: y + 'px', borderWidth: bw, borderRadius: br, opacity: bo }));
+
+  // URL pill typing
+  const up = spr(t, 9.42, 2.4, 0.8), uo = 1 - eout(prog(t, 10.42, 0.18));
+  const n = Math.round(clamp((t - 9.52) / 0.7) * URL_TEXT.length);
+  const typed = URL_TEXT.slice(0, n);
+  const dot = typed.indexOf('.');
+  $('urlTxt').innerHTML = dot < 0 ? typed : `${typed.slice(0, dot)}<span class="dim">${typed.slice(dot)}</span>`;
+  $('caret').style.opacity = (n < URL_TEXT.length || Math.floor(t * 4) % 2 === 0) ? 1 : 0;
+  set($('urlPill'), { left: '540px', top: (QRBOX.y + QRBOX.h + 110) + 'px', opacity: t < 9.42 ? 0 : clamp(up * 1.5) * uo,
+    transform: `translateX(-50%) translateY(${(1 - up) * 40}px) scale(${0.9 + 0.1 * up})` });
+
+  // ── END CARD ──
+  const endV = t > T.end - 0.05;
+  $('end').style.visibility = endV ? 'visible' : 'hidden';
+  reveal($('word'), t, T.end - 0.02, 1e9, 1.9);
+  reveal($('tag'), t, T.end + 0.46, 1e9, 2.1);
+  const pc = spr(t, T.end + 0.96, 2.4, 0.78);
+  set($('priceChip'), { opacity: t < T.end + 0.96 ? 0 : clamp(pc * 1.6), transform: `scale(${0.82 + 0.18 * pc})`, transformOrigin: '0 50%' });
+  reveal($('ctaLbl'), t, T.end + 1.46, 1e9, 2.1);
+  reveal($('cta'), t, T.end + 1.52, 1e9, 2.0);
+}
+
+window.seek = seek;
+window.DURATION = T.dur;
+window.ready = (async () => {
+  await Promise.all(['900', '800', '700', '600', '500'].flatMap(w => [
+    document.fonts.load(`${w} 100px "Inter Display"`), document.fonts.load(`${w} 100px "Inter"`)]));
+  await document.fonts.ready;
+  // fit hook lines to 920px
+  const lines = [...document.querySelectorAll('#hook .line')];
+  let size = 220;
+  lines.forEach(l => l.style.fontSize = size + 'px');
+  const widest = Math.max(...lines.map(l => l.getBoundingClientRect().width));
+  size = Math.floor(size * 920 / widest);
+  lines.forEach(l => l.style.fontSize = size + 'px');
+  seek(0);
+  return size;
+})();
+</script>
+</body>
+</html>
