@@ -1,0 +1,62 @@
+{
+ "accent": "#FF1E3C",
+ "nameLines": [
+  "PLACEHOLDER",
+  "NAME"
+ ],
+ "nameKana": "\u30d7\u30ec\u30fc\u30b9\u30db\u30eb\u30c0\u30fc",
+ "role": "PLACEHOLDER ROLE",
+ "url": "nicololombardi.framer.website",
+ "eye": {
+  "src": "dev/eye.png",
+  "pupil": [
+   0.5,
+   0.52
+  ],
+  "pupilR": 0.06,
+  "halfWidth": 0.27,
+  "lidUp": 0.2,
+  "lidDown": 0.17,
+  "tilt": 0.04,
+  "fit": 1.0
+ },
+ "hero": {
+  "src": "dev/hero.png"
+ },
+ "projects": [
+  {
+   "title": "Project 1",
+   "year": "2026",
+   "tag": "placeholder",
+   "img": "dev/p0.png"
+  },
+  {
+   "title": "Project 2",
+   "year": "2026",
+   "tag": "placeholder",
+   "img": "dev/p1.png"
+  },
+  {
+   "title": "Project 3",
+   "year": "2026",
+   "tag": "placeholder",
+   "img": "dev/p2.png"
+  },
+  {
+   "title": "Project 4",
+   "year": "2026",
+   "tag": "placeholder",
+   "img": "dev/p3.png"
+  }
+ ],
+ "stack": [
+  "ONE",
+  "TWO",
+  "THREE",
+  "FOUR",
+  "FIVE",
+  "SIX",
+  "SEVEN",
+  "EIGHT"
+ ]
+}
