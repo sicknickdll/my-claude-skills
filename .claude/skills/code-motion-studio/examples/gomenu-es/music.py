@@ -185,7 +185,6 @@ for i, t0 in enumerate((0.0, 0.5, 1.0)):
     kick(t0, 0.9)
     stab(t0, DM if i < 2 else [65, 69, 72, 77], d=0.45, g=1.1, bright=1.4, send=0.4)
     bass(t0, 38, d=0.4)
-blip(1.5, 81, 0.7)                  # sub line
 pad(0.0, [50, 57, 62, 65], 2.1, 0.8, att=0.3, rel=0.3)
 riser(1.0, 1.0, 0.9)
 for k in range(8):                   # 16th snare build in the last two beats

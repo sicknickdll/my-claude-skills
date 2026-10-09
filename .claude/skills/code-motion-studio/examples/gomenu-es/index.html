@@ -25,11 +25,10 @@
   .mask > * { display: block; }
 
   /* hook */
-  #hook { left: 80px; top: 640px; z-index: 0; }
+  #hook { left: 80px; top: 690px; z-index: 0; }
   #hook .line { font-family: var(--display); font-weight: 900; color: var(--cream);
     letter-spacing: -0.045em; line-height: 0.98; white-space: nowrap; }
   #hook .acc { color: var(--accent); }
-  #hookSub { margin-top: 56px; font: 500 46px/1.2 var(--text); color: rgba(245,240,232,.62); letter-spacing: -0.01em; }
 
   #bgPanel { width: 1080px; height: 1920px; background: var(--cream); z-index: 1; }
 
@@ -104,7 +103,8 @@
   #priceChip { top: 1010px; padding: 22px 38px; border-radius: 999px; background: var(--ink); color: var(--cream);
     font: 600 46px/1 var(--text); letter-spacing: -0.02em; white-space: nowrap; }
   #priceChip b { font-weight: 800; color: var(--accent); }
-  #ctaLbl { font: 600 44px/1 var(--text); letter-spacing: -0.02em; color: rgba(20,17,15,.72); }
+  #ctaLbl { font: 700 58px/1 var(--display); letter-spacing: -0.03em; color: var(--ink); }
+  #ctaLbl b { font-weight: 900; color: var(--paper); }
   #cta { font: 900 112px/1.05 var(--display); letter-spacing: -0.05em; color: var(--ink); white-space: nowrap; }
 </style>
 </head>
@@ -115,7 +115,6 @@
     <div class="mask"><span class="line" id="h1">¿Necesitas</span></div>
     <div class="mask"><span class="line" id="h2">un menú</span></div>
     <div class="mask"><span class="line acc" id="h3">digital?</span></div>
-    <div class="mask"><span id="hookSub">Sin PDFs. Sin imprimir. Sin código.</span></div>
   </div>
 
   <div id="bgPanel" class="abs"></div>
@@ -159,7 +158,7 @@
     <div class="mask row" id="wordM" style="top:600px"><div id="word" style="position:static">Go<span>Menu</span></div></div>
     <div class="mask row" style="top:842px"><div id="tag" style="position:static">Tu carta digital, en minutos.</div></div>
     <div class="row" id="priceChip">Desde <b>7,90 €</b>/mes</div>
-    <div class="mask row" style="top:1262px"><div id="ctaLbl">Pruébalo hoy en</div></div>
+    <div class="mask row" style="top:1240px"><div id="ctaLbl">Pruébalo <b>GRATIS</b> hoy en</div></div>
     <div class="mask row" style="top:1326px"><div id="cta">gomenu.click&nbsp;→</div></div>
   </div>
 </div>
@@ -297,7 +296,6 @@ function seek(t) {
 
   // ── HOOK ──
   ['h1', 'h2', 'h3'].forEach((id, i) => reveal($(id), t, i * 0.5 - (i ? 0.04 : 0.16), 1.94 + i * 0.05, 2.6));  // line 1 is already mid-slam on frame 0 (cover frame)
-  reveal($('hookSub'), t, 1.46, 2.06);
   $('hook').style.visibility = t > 2.6 ? 'hidden' : 'visible';
 
   // ── cream panel rises ──
