@@ -38,6 +38,7 @@ AUDIO_IN = 0.021  # the whole track: v = 0 is the first downbeat (bar 0), the 21
 END_N = 224  # 14 bars: the track cuts out here
 TAIL = 0.6  # the end card holds in silence after the music stops
 NF = int(round((END_N * SIX + TAIL) * FPS))  # 926 frames, 30.87 s
+NO_HUD = True
 
 RED = np.array([1.0, 0.165, 0.165], np.float32)  # #FF2A2A
 WHITE = np.array([1.0, 1.0, 1.0], np.float32)
@@ -1115,7 +1116,6 @@ def render_logos(s, v, f):
         img = slices(img, r, 7, 180, 6, 60)
     if lt < 1 / FPS and k % 2 == 0:
         img = 1.0 - img  # strobe: first frame inverted on every other logo
-    label(img, "SELECTED CLIENTS", 58, 92, 16, WHITE, 0.85)
     label(img, f"{k + 1:02d}/14", W / 2, H - 150, 32, RED, 0.95, anchor="tc")
     label(img, LOGO_NAMES[k], W / 2, H - 112, 16, WHITE, 0.85, anchor="tc")
     if in_gate(v):
@@ -1166,7 +1166,6 @@ def render_words(s, v, f):
             img, _ = big_word(img, line, cy, size, WHITE, 1.0, jit)
         if wl < 2 / FPS:
             img = slices(img, r, 9, 200)
-        label(img, "NICOLÓ LOMBARDI //", 58, 92, 16, WHITE, 0.85)
     else:
         # last beat of bar 12: the site's pixel curtain swallows the frame
         tc = (v - V(WORDS_N + 12)) * 1000 * 0.86
@@ -1339,8 +1338,14 @@ def render_frame(f):
         if r.random() < 0.5:
             img = blocks(img, r, 6)
 
-    # HUD
+    # HUD: v3 keeps the frame clean -- no REC / timecode / corner brackets / labels on the borders
     tag = s.get("tag")
+    if NO_HUD:
+        if kind == "eye_intro" and meta.get("reticle"):
+            pos, Z = meta["reticle"]
+            img = draw_reticle(img, pos, Z, n)
+        grain = 0.038 if kind not in ("black",) else 0.025
+        return u8(post(img, f, grain=grain, scan=kind != "black"))
     if kind == "eye_intro":
         if meta.get("hud", True):
             img = hud(img, v)
