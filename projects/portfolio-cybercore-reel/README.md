@@ -22,6 +22,7 @@ python3 reel.py prep
 python3 reel.py beats            # one still per beat -> $REEL_SCRATCH/out/stills
 python3 reel.py render           # -> $REEL_SCRATCH/out/reel.mp4 (CRF 18 master)
 python3 reel.py share            # -> reel-share.mp4, two-pass, under 30 MB
+REEL_VERTICAL=1 python3 reel.py render && REEL_VERTICAL=1 python3 reel.py share   # 9:16 -> out_v/
 ```
 
 ## Notes

@@ -29,10 +29,12 @@ SCRATCH = os.environ.get("REEL_SCRATCH", os.path.join(os.path.dirname(__file__),
 ASSETS = os.path.join(SCRATCH, "assets")
 REC = os.path.join(SCRATCH, "rec")
 CLIPS = os.path.join(SCRATCH, "clips")
-OUT = os.path.join(SCRATCH, "out")
+VERT = os.environ.get("REEL_VERTICAL") == "1"  # 9:16 version
+OUT = os.path.join(SCRATCH, "out_v" if VERT else "out")
 AUDIO = os.path.join(SCRATCH, "audio", "track.wav")
 
-W, H, FPS = 1920, 1080, 30
+W, H, FPS = (1080, 1920, 30) if VERT else (1920, 1080, 30)
+EYE_BASE = max(W / 1280, H / 720)  # the eye video, cover-fitted
 SIX = 60.0 / 111.0 / 4.0  # one 16th note at 111 BPM
 AUDIO_IN = 0.021  # the whole track: v = 0 is the first downbeat (bar 0), the 21 ms before it are silent
 END_N = 224  # 14 bars: the track cuts out here
@@ -404,6 +406,12 @@ def label(img, text, x, y, size=16, color=WHITE, opacity=0.85, font=FONT_PIXEL, 
     return paste(img, m, x, y, color, opacity)
 
 
+def fit_size(lines, size, frac=0.9):
+    """Largest size <= `size` at which every line fits `frac` of the frame width."""
+    wmax = max(text_mask(t, FONT_BOLD, size, -0.04, 1.08).shape[1] for t in lines)
+    return size if wmax <= W * frac else int(size * W * frac / wmax)
+
+
 def big_word(img, text, cy, size, color=WHITE, opacity=1.0, jitter=(0, 0)):
     """Site-style display type: Arial bold, -0.04em tracking, 1.08 horizontal stretch."""
     m = text_mask(text, FONT_BOLD, size, -0.04, 1.08)
@@ -492,7 +500,7 @@ def out_grid():
 def eye_view(te, c, Z, center, pixel=0.0):
     """Render the eye with lid closure c, zoom Z (1 = full frame), source point `center` at frame centre."""
     xx, yy = out_grid()
-    s = 1.5 * Z
+    s = EYE_BASE * Z
     xs = (center[0] + (xx - W / 2) / s).astype(np.float32)
     ys = (center[1] + (yy - H / 2) / s).astype(np.float32)
     ys = lid_remap(xs, ys, c).astype(np.float32)
@@ -512,7 +520,7 @@ def zoom_center(Z, c0=EYE_C, p=PUPIL, k=1.12):
 
 
 def pupil_screen(Z, center):
-    s = 1.5 * Z
+    s = EYE_BASE * Z
     return (W / 2 + (PUPIL[0] - center[0]) * s, H / 2 + (PUPIL[1] - center[1]) * s)
 
 
@@ -549,8 +557,8 @@ SITE_EASE = cubic_bezier(0.16, 1.0, 0.3, 1.0)  # the site's --ease
 SNAP_N = 32  # bar 2: the eye snaps open
 DIVE_END = 63.5  # inside the pupil; the track breathes until bar 4
 NAME = "NICOLÓ LOMBARDI"
-NAME_SIZE = 120
-NAME_CY = 500
+NAME_SIZE = 96 if VERT else 120
+NAME_CY = int(H * 0.463)
 
 
 @lru_cache(maxsize=2)
@@ -776,7 +784,7 @@ def scene_eye_intro(f, v):
 
 def draw_reticle(img, pos, Z, n):
     px, py = pos
-    r = max(26.0, 40 * 1.5 * Z * 1.35)
+    r = max(26.0, 40 * EYE_BASE * Z * 1.35)
     if r > 700:
         return img
     a = 0.9
@@ -1007,12 +1015,21 @@ def render_clip(s, v, f):
     src = clip_frame(s["key"], s["t_in"], lt * s["speed"])
     z0, z1 = s["zoom"]
     z = z0 + (z1 - z0) * (lt / max(1e-6, V(s["n1"] - s["n0"])))
-    img = cam(src, z, s["cx"], s["cy"], s["fit"], s["crop"])
+    if VERT and s["key"] == "lexus":  # crop the ad's burned-in text off the top and bottom
+        z *= 1.8
+    cy = 0.5 if VERT and s["key"] == "lexus" else s["cy"]
+    img = cam(src, z, s["cx"], cy, s["fit"], s["crop"])
     return grade(img, s["grade"])
 
 
 def render_trip(s, v, f):
     n = N(v)
+    if VERT:  # vertical clips simply fill the frame: newest lit panel, full screen
+        lit = [pnl for pnl in s["panels"] if pnl[1] <= n]
+        _, n_on, key, t_in, gr = max(lit, key=lambda q: (q[1], q[0]))
+        lt = v - V(n_on)
+        img = grade(cam(clip_frame(key, t_in, lt), 1.0 + 0.1 * math.exp(-lt / 0.12), 0.5, 0.45), gr)
+        return np.clip(img + 0.5 * max(0.0, 1 - lt * FPS / 2), 0, 1)
     img = np.zeros((H, W, 3), np.float32)
     pw = W // 3
     for p in range(3):
@@ -1101,7 +1118,7 @@ def render_logos(s, v, f):
     ratio = LOGO_RATIO[k]
     area = 470.0 * 470.0
     hgt = min(470.0, math.sqrt(area / ratio))
-    wid = min(1400.0, hgt * ratio)
+    wid = min(1400.0, W * 0.85, hgt * ratio)
     hgt = wid / ratio
     z = 1.0 + 0.16 * math.exp(-lt / 0.05)
     wid, hgt = wid * z, hgt * z
@@ -1158,6 +1175,9 @@ def render_words(s, v, f):
         size = 250 if len(lines) == 1 else 200
         if len(lines) == 1 and len(lines[0]) > 10:
             size = 230
+        if VERT:  # stack one word per line, as big as the width allows
+            lines = [w for ln in lines for w in ln.split()]
+            size = fit_size(lines, 240)
         jit = (int(r.integers(-8, 9)), int(r.integers(-5, 6))) if wl > 1.5 / FPS else (int(r.integers(-60, 61)), 0)
         total = len(lines)
         for li, line in enumerate(lines):
@@ -1210,7 +1230,7 @@ def scene_eye_outro(s, v, f):
     # lockup
     if n >= OUT_N + 3:
         wl = v - V(OUT_N + 3)
-        lm = text_mask(NAME, FONT_BOLD, 150, -0.04, 1.08)
+        lm = text_mask(NAME, FONT_BOLD, fit_size([NAME], 150), -0.04, 1.08)
         x0 = (W - lm.shape[1]) / 2
         y0 = H / 2 - lm.shape[0] / 2 - 30
         rise = int(40 * (1 - ease_out(wl / 0.18)))  # site-style letter rise, compressed
@@ -1238,6 +1258,8 @@ def render_end_card(v, f):
     gx = int((f * 9) % 48)  # the logo strobe's faint grid
     img[:, gx::48] += 0.035
     img[(f * 5) % 48 :: 48, :] += 0.035
+    if VERT:
+        return render_end_card_vertical(v, f, n, lt, r, img)
     big = 196
     m1 = text_mask("NEW PORTFOLIO", FONT_BOLD, big, -0.04, 1.08)
     m2 = text_mask("LIVE", FONT_BOLD, big, -0.04, 1.08)
@@ -1269,6 +1291,43 @@ def render_end_card(v, f):
     else:
         img = rgb_split(img, 2.0)
     # CRT power-off in the last frames
+    if f >= NF - 3:
+        k = (f - (NF - 3)) / 3.0
+        band = max(1, int((1 - k) * 6))
+        img = np.zeros_like(img)
+        img[H // 2 - band : H // 2 + band, int(W * k * 0.45) : int(W * (1 - k * 0.45))] = 0.9
+    return img
+
+
+def render_end_card_vertical(v, f, n, lt, r, img):
+    big = fit_size(["PORTFOLIO"], 230)
+    ms = [text_mask(t, FONT_BOLD, big, -0.04, 1.08) for t in ("NEW", "PORTFOLIO", "LIVE")]
+    um = text_mask("NICOLO-LOMBARDI.COM", FONT_PIXEL, 32)
+    z = 1.0 + 0.12 * math.exp(-lt / 0.06)
+    jx = int(r.integers(-50, 51)) if lt < 1.5 / FPS else 0
+    lh = ms[1].shape[0] + 40
+    y = H / 2 - 1.6 * lh
+    for m in ms[:2]:
+        x = (W - m.shape[1]) / 2 + jx
+        paste(img, m, x + 12, y, RED, 0.55)
+        paste(img, m, x, y, WHITE, 1.0)
+        y += lh
+    dot, gap = int(big * 0.21), int(big * 0.2)
+    x2 = (W - (2 * dot + gap + ms[2].shape[1])) / 2 - jx
+    if (n % 4) < 2.0:
+        cv2.circle(img, (int(x2 + dot), int(y + ms[2].shape[0] / 2)), dot, tuple(float(c) for c in RED), -1, cv2.LINE_AA)
+    paste(img, ms[2], x2 + 2 * dot + gap, y, RED, 1.0)
+    paste(img, um, (W - um.shape[1]) / 2, y + ms[2].shape[0] + 90, WHITE, 0.9)
+    img = scale_about(img, z)
+    if n < END_N:
+        for hn, amp in ((CARD_N, 30.0), (218, 16.0), (220, 16.0), (222, 10.0), (223, 10.0)):
+            dt = v - V(hn)
+            if 0 <= dt < 0.25:
+                img = rgb_split(img, amp * math.exp(-dt / 0.06))
+                if dt < 1.0 / FPS or (hn == CARD_N and dt < 2.0 / FPS):
+                    img = slices(img, r, 7, 160, 6, 70)
+    else:
+        img = rgb_split(img, 2.0)
     if f >= NF - 3:
         k = (f - (NF - 3)) / 3.0
         band = max(1, int((1 - k) * 6))
