@@ -1,42 +1,35 @@
-// Single-page portfolio. Routes live in the URL hash:
-//   #home (default) · #film · #visuals · #project/<id>
-// Content comes from data.js; this file only renders it.
-import { projects, filmOrder, visualsOrder, hero, heroPoster } from "./data.js";
-import {
-  videoGalleryMarkup,
-  imageGalleryMarkup,
-  bindGalleries,
-  videoSources,
-} from "./galleries.js";
-import { logoFilters, projectLogoMarkup } from "./project-logos.js";
+// Portfolio behaviour. Every page (/, /film/, /visuals/, /work/<id>/) is a real,
+// pre-built HTML file (see tools/build.mjs) so search engines can read it; this
+// script re-renders the same markup and adds the interactions: snap scrolling,
+// previous/next logo hover, carousels, the About panel.
+import { projects } from "./data.js";
+import { bindGalleries } from "./galleries.js";
+import { projectLogoMarkup } from "./project-logos.js";
+import { film, visuals, homeMarkup, listMarkup, projectMarkup, projectURL } from "./views.js";
 const main = document.querySelector("#main");
 const reduce = matchMedia("(prefers-reduced-motion: reduce)");
-const byIds = (ids) => ids.map((id) => projects.find((p) => p.id === id)).filter(Boolean);
-const film = byIds(filmOrder);
-const visuals = byIds(visualsOrder);
 let cleanup = () => {},
   returnFocus = null;
-// Where the "back" link on a project page leads, and which project to scroll back to.
-let lastList = "film",
-  returnTo = null;
-const esc = (s) =>
-  s.replace(
-    /[&<>"']/g,
-    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
-  );
-const projectURL = (p) => "#project/" + p.id;
+// Remembers which list the visitor came from, so "back" on a project returns there.
+const memory = {
+  get: () => {
+    try {
+      return sessionStorage.getItem("lastList");
+    } catch {
+      return null;
+    }
+  },
+  set: (v) => {
+    try {
+      sessionStorage.setItem("lastList", v);
+    } catch {}
+  },
+};
 function announce(s) {
   document.querySelector("#announcer").textContent = s;
 }
 function showHome() {
-  const name = "Nicoló Lombardi";
-  const letters = [...name]
-    .map(
-      (letter, i) =>
-        `<span class="name-letter" style="--letter:${i}" aria-hidden="true">${letter === " " ? "&nbsp;" : esc(letter)}</span>`,
-    )
-    .join("");
-  main.innerHTML = `<section class="home" aria-label="Portfolio introduction"><img class="poster" src="${heroPoster}" alt=""><video id="entrance-video" poster="${heroPoster}" autoplay loop muted playsinline preload="auto" aria-hidden="true">${videoSources(hero)}</video><a class="home-entry" href="#film" aria-label="Explore films by Nicoló Lombardi"><h1 class="animated-name" aria-label="Nicoló Lombardi">${letters}</h1><span class="down" aria-hidden="true"></span></a><button class="home-pause" aria-label="Pause background video">pause</button></section>${projectMarkup(film, "Selected films")}`;
+  main.innerHTML = homeMarkup();
   const v = document.querySelector("#entrance-video"),
     b = document.querySelector(".home-pause");
   const setPaused = (paused) => {
@@ -58,9 +51,6 @@ function showHome() {
     v.pause();
     scrollCleanup();
   };
-}
-function projectMarkup(list, label) {
-  return `${logoFilters}<div class="project-scroll" aria-label="${label}">${list.map((p, i) => `<section class="project-section" data-project="${p.id}" aria-label="${esc(p.brand + " — " + p.title)}"><a class="project-open" href="${projectURL(p)}" aria-label="Open ${esc(p.brand + " — " + p.title)} project"></a><img src="${p.cover}" alt="${esc(p.brand + " — " + p.title)}" loading="${i === 0 ? "eager" : "lazy"}" decoding="async"></section>`).join("")}</div><a class="view-project" href="${projectURL(list[0])}" aria-label="View ${esc(list[0].brand)} project" hidden>view project</a><button class="project-prev" aria-label="Previous project"></button><button class="project-next" aria-label="Next project"></button><div class="project-cursor" aria-hidden="true" hidden></div>`;
 }
 function bindProjectScroll(list) {
   const link = main.querySelector(".view-project");
@@ -204,9 +194,9 @@ function bindProjectScroll(list) {
     returning = true;
     hideCursor();
     announce("Back to Nicoló Lombardi");
-    const route = location.hash.slice(1) || "home";
-    if (route === "home") window.scrollTo({ top: 0, behavior: reduce.matches ? "auto" : "smooth" });
-    else location.hash = "home";
+    if (location.pathname === "/")
+      window.scrollTo({ top: 0, behavior: reduce.matches ? "auto" : "smooth" });
+    else location.href = "/";
   };
   const wheel = (e) => {
     const now = performance.now(),
@@ -296,45 +286,22 @@ function bindProjectScroll(list) {
     window.removeEventListener("touchcancel", touchCancel);
   };
 }
-function showProjects(list, label) {
-  main.innerHTML = projectMarkup(list, label);
+function showProjects(list, label, heading) {
+  main.innerHTML = listMarkup(list, label, heading);
   cleanup = bindProjectScroll(list);
-}
-function showFilm() {
-  showProjects(film, "Selected films");
-}
-function showVisuals() {
-  showProjects(visuals, "Visual projects");
 }
 function showProject(id) {
   const p = projects.find((x) => x.id === id);
-  if (!p) {
-    location.hash = "film";
-    return;
-  }
-  document.title = `${p.brand} — ${p.title} · Nicoló Lombardi`;
-  returnTo = p.id;
-  const local =
-    p.videos.length === 1
-      ? `<section class="single-film" aria-label="${esc(p.brand)} film"><video controls playsinline preload="metadata" poster="${p.videoPosters?.[0] || p.cover}" aria-label="${esc(p.title)}">${videoSources(p.videos[0])}</video></section>`
-      : p.videos.length > 1
-        ? videoGalleryMarkup(p, esc)
-        : "";
-  const embed =
-    p.youtube ||
-    (p.externalVideo?.includes("vimeo.com/")
-      ? "https://player.vimeo.com/video/" + p.externalVideo.match(/vimeo\.com\/(\d+)/)[1]
-      : null);
-  const media = embed
-    ? `<section class="single-film"><iframe src="${esc(embed)}" title="${esc(p.title)}" allow="fullscreen; picture-in-picture; encrypted-media" allowfullscreen loading="lazy"></iframe></section>`
-    : local;
-  const images = imageGalleryMarkup(p, esc);
-  const fallback =
-    !media && !images
-      ? `<section class="detail-header"><img src="${p.cover}" alt="${esc(p.title)}"></section>`
-      : "";
-  const next = projects[(projects.indexOf(p) + 1) % projects.length];
-  main.innerHTML = `<article class="detail"><a class="back" href="#${lastList}">back</a>${media}${images}${fallback}<header class="detail-heading"><h1>${esc(p.brand)}${p.title === p.brand ? "" : "<br>" + esc(p.title)}</h1><p>${esc(p.type)}</p></header><div class="detail-text"><h2>About the project</h2><p>${esc(p.description)}</p></div>${p.externalVideo ? `<p class="media-note"><a href="${esc(p.externalVideo)}" target="_blank" rel="noopener noreferrer">Open film on Vimeo</a></p>` : ""}<a class="next-project" href="${projectURL(next)}"><span>Next project</span><strong>${esc(next.brand)}</strong></a></article>`;
+  if (!p) return location.replace("/film/");
+  // Back to the list the visitor came from, if this project is in it.
+  const inList = { "/": film, "/film/": film, "/visuals/": visuals };
+  const remembered = memory.get();
+  const list = inList[remembered]?.includes(p)
+    ? remembered
+    : film.includes(p)
+      ? "/film/"
+      : "/visuals/";
+  main.innerHTML = projectMarkup(p, `${list}#p-${p.id}`);
   main.querySelectorAll("video").forEach((v) =>
     v.addEventListener("play", () =>
       main.querySelectorAll("video").forEach((other) => {
@@ -348,28 +315,31 @@ function showProject(id) {
     main.querySelectorAll("video").forEach((v) => v.pause());
   };
 }
+// Old ChatGPT-site links used #film, #visuals and #project/<id>: send them to the real pages.
+function redirectLegacyHash() {
+  const h = location.hash.slice(1);
+  if (h === "film" || h === "visuals") return (location.replace(`/${h}/`), true);
+  if (h.startsWith("project/")) return (location.replace(`/work/${h.slice(8)}/`), true);
+  if (h === "home") history.replaceState(null, "", "/");
+  return false;
+}
 function render() {
-  cleanup();
-  closeOverlay();
-  const route = location.hash.slice(1) || "home";
-  document.documentElement.classList.toggle("snap-pages", !route.startsWith("project/"));
-  document.title = "Nicoló Lombardi — Film & Visuals";
+  const path = location.pathname.replace(/index\.html$/, "");
+  const work = path.match(/^\/work\/([^/]+)\/?$/);
+  document.documentElement.classList.toggle("snap-pages", !work);
   document.querySelectorAll(".header a").forEach((a) => {
-    if (a.hash === "#" + route) a.setAttribute("aria-current", "page");
+    if (a.pathname === path) a.setAttribute("aria-current", "page");
     else a.removeAttribute("aria-current");
   });
-  const isProject = route.startsWith("project/");
-  if (route === "film") showFilm();
-  else if (route === "visuals") showVisuals();
-  else if (isProject) showProject(route.slice(8));
+  if (path === "/film/") showProjects(film, "Selected films", "Films by Nicoló Lombardi");
+  else if (path === "/visuals/")
+    showProjects(visuals, "Visual projects", "Visual projects by Nicoló Lombardi");
+  else if (work) showProject(work[1]);
   else showHome();
-  // Coming back from a project page: land on that project's slide, not the top.
-  const section = !isProject && returnTo && main.querySelector(`[data-project="${returnTo}"]`);
-  window.scrollTo({ top: section ? section.offsetTop : 0, behavior: "instant" });
-  if (!isProject) {
-    lastList = route === "film" || route === "visuals" ? route : "home";
-    returnTo = null;
-  }
+  if (!work) memory.set(path === "/film/" || path === "/visuals/" ? path : "/");
+  // Arriving from "back" (…#p-<id>): land on that project's slide.
+  const target = location.hash.startsWith("#p-") && document.getElementById(location.hash.slice(1));
+  window.scrollTo({ top: target ? target.offsetTop : 0, behavior: "instant" });
 }
 const about = document.querySelector("#about"),
   aboutToggle = document.querySelector("#about-toggle");
@@ -416,17 +386,14 @@ window.addEventListener("keydown", (e) => {
     }
   }
 });
+// Clicking the link of the page you're already on scrolls back to the top.
 document.querySelectorAll(".header a").forEach((a) =>
   a.addEventListener("click", (e) => {
-    if (
-      location.hash === a.getAttribute("href") ||
-      (!location.hash && a.getAttribute("href") === "#home")
-    ) {
+    if (a.pathname === location.pathname) {
       e.preventDefault();
       window.scrollTo({ top: 0, behavior: reduce.matches ? "auto" : "smooth" });
     }
   }),
 );
 document.querySelector("#year").textContent = new Date().getFullYear();
-window.addEventListener("hashchange", render);
-render();
+if (!redirectLegacyHash()) render();

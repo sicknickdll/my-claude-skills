@@ -1,46 +1,70 @@
 # nicolo-lombardi.com
 
-Nicoló Lombardi's portfolio (film and visuals), rebuilt as a plain static website. There's
-nothing to install and no build step: the files in this folder *are* the website, so it runs
-on any static host (GitHub Pages, Cloudflare Pages, Netlify, or plain FTP hosting).
+Nicoló Lombardi's portfolio (film and visuals) as a plain static website: every page is a
+ready-made HTML file, so it runs on any static host (GitHub Pages, Cloudflare Pages, Netlify,
+or plain FTP hosting) and search engines can read every project.
 
 ```
-index.html          page shell: header, About panel, link-preview tags
-style.css           all styling
-js/data.js          ← ALL CONTENT: projects, texts, videos, and the order of Film / Visuals
-js/app.js           routing (#home, #film, #visuals, #project/<id>) and the scroll pages
-js/galleries.js     video carousel and image carousel on project pages
+template.html       page shell (header, About panel) used for every page
+js/data.js          ← ALL CONTENT: projects, texts, videos, order of Film / Visuals
+js/views.js         page markup, shared by the browser and the page generator
+js/app.js           interactions: snap scrolling, logo hover, carousels, About panel
+js/galleries.js     video and image carousels on project pages
 js/project-logos.js brand logos shown when hovering the left/right edges
-assets/             images (.webp), videos (.webm + .mp4 fallback), icons, og-image.jpg
-tools/              prepare-video.sh, which converts a new video into the formats above
-CNAME, .nojekyll    GitHub Pages settings (custom domain, serve files as-is)
-_headers            caching and security headers for Netlify / Cloudflare Pages
+tools/build.mjs     generates the pages below + sitemap.xml   (npm run build)
+tools/make-og-images.py  link-preview images in assets/og/
+tools/prepare-video.sh   converts a new video into the needed formats
+index.html, film/, visuals/, work/<id>/   GENERATED pages, don't edit by hand
+assets/             images (.webp), videos (.webm + .mp4 fallback), icons, previews
+CNAME, .nojekyll    GitHub Pages settings · _headers for Netlify / Cloudflare
 404.html, robots.txt, sitemap.xml
 ```
 
+Pages and addresses:
+
+| Address | Page |
+| --- | --- |
+| `/` | landing video + film list |
+| `/film/`, `/visuals/` | full-screen project lists |
+| `/work/<id>/` | one page per project, e.g. `/work/lexus/` |
+
+Old links from the previous site (`/#film`, `/#project/lexus`) redirect to the new addresses.
+
 ## Preview on your computer
 
-Any static server works. With Node installed: `npx serve .`, then open http://localhost:3000.
-(Opening `index.html` by double-click won't work, because browsers block JavaScript modules
-loaded from `file://`.)
+With Node installed: `npx serve .`, then open http://localhost:3000.
+(Double-clicking `index.html` won't work: browsers block JavaScript modules from `file://`.)
 
 ## Changing content
 
-Everything lives in **`js/data.js`**. The comment at the top of that file explains each field.
+Everything lives in **`js/data.js`**. The comment at the top explains each field.
+**After any change, run `node tools/build.mjs`** to regenerate the pages and sitemap, then
+commit and push.
 
-- **Edit a text**: change `title`, `type`, or `description` of the project.
+- **Edit a text**: change `title`, `type` or `description` of the project. The first ~155
+  characters of `description` become the Google snippet, so lead with what and for whom.
 - **Reorder / hide projects**: edit `filmOrder` and `visualsOrder` at the bottom of the file.
 - **Add a project**:
   1. Put a full-screen cover image in `assets/` (`.webp` or `.jpg`, ~2560 px wide).
-  2. For each video run `tools/prepare-video.sh path/to/video.mov myproject-01` (needs
-     `ffmpeg`). It creates the `.webm`, `.mp4`, poster, and thumbnail, and prints what to paste.
-  3. Copy an existing project block in `projects`, give it a new `id`, fill in the fields,
-     and add the `id` to `filmOrder` and/or `visualsOrder`.
-  4. New projects show their brand name as text on the hover edges. A cropped logo can be
-     added later in `js/project-logos.js`.
-- **About text / contact**: edit the `<aside id="about">` section in `index.html`.
+  2. For each video run `tools/prepare-video.sh path/to/video.mov myproject-01` (needs `ffmpeg`).
+  3. Copy an existing project block in `projects`, give it a new `id` (it becomes the address
+     `/work/<id>/`), fill in the fields, and add the `id` to `filmOrder` and/or `visualsOrder`.
+  4. `python3 tools/make-og-images.py` (link-preview image), then `node tools/build.mjs`.
+  5. New projects show their brand name as text on the hover edges. A cropped logo can be
+     added in `js/project-logos.js`.
+- **About text / contact**: edit `template.html`, then rebuild.
 
 Keep every file under 24 MB so it fits all free hosts.
+
+## SEO checklist (after the site is live)
+
+1. **Google Search Console** (search.google.com/search-console): add a *Domain* property for
+   `nicolo-lombardi.com`, verify it with the TXT record it gives you (OVH → DNS zone → add TXT),
+   then under *Sitemaps* submit `https://nicolo-lombardi.com/sitemap.xml`.
+2. In *URL inspection*, request indexing for `/` and each `/work/…` page.
+3. Link the site from Instagram bio, LinkedIn (Contact info + Featured), Vimeo and YouTube
+   profiles. Ask collaborators and press to link to the project pages.
+4. Test link previews: paste a project address into LinkedIn's Post Inspector.
 
 ## Hosting (GitHub Pages + OVH domain)
 
@@ -48,12 +72,10 @@ GitHub Pages is free, includes HTTPS, and redeploys automatically on every push.
 
 ### 1. Publish the site
 
-1. Put the contents of this folder at the root of a **public** GitHub repository (e.g.
-   `nicolo-lombardi.com`).
+1. This repository must be **public** (free GitHub Pages).
 2. Repository **Settings → Pages**. Under *Build and deployment*, choose **Deploy from a
    branch**, branch `main`, folder `/ (root)`, then **Save**.
-3. In the same page, under *Custom domain*, enter `nicolo-lombardi.com` and **Save**. The site
-   is now also reachable at `https://<github-user>.github.io/<repo>/` while DNS is pending.
+3. In the same page, under *Custom domain*, enter `nicolo-lombardi.com` and **Save**.
 
 ### 2. Point the domain (OVHcloud control panel)
 
@@ -68,7 +90,7 @@ GitHub Pages is free, includes HTTPS, and redeploys automatically on every push.
 | Add | *(empty)* | A | `185.199.109.153` |
 | Add | *(empty)* | A | `185.199.110.153` |
 | Add | *(empty)* | A | `185.199.111.153` |
-| Add | `www` | CNAME | `<github-user>.github.io.` |
+| Add | `www` | CNAME | `sicknickdll.github.io.` |
 
 Leave the **MX** and **TXT** records alone (they belong to OVH e-mail and SPF).
 
