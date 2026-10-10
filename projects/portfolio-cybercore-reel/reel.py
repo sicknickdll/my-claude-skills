@@ -33,9 +33,11 @@ OUT = os.path.join(SCRATCH, "out")
 AUDIO = os.path.join(SCRATCH, "audio", "track.wav")
 
 W, H, FPS = 1920, 1080, 30
-NF = 750  # 25.000 s
 SIX = 60.0 / 111.0 / 4.0  # one 16th note at 111 BPM
-AUDIO_IN = 5.29127  # source seconds at v = 0, so the reel ends on the bar the track cuts on
+AUDIO_IN = 0.021  # the whole track: v = 0 is the first downbeat (bar 0), the 21 ms before it are silent
+END_N = 224  # 14 bars: the track cuts out here
+TAIL = 0.6  # the end card holds in silence after the music stops
+NF = int(round((END_N * SIX + TAIL) * FPS))  # 926 frames, 30.87 s
 
 RED = np.array([1.0, 0.165, 0.165], np.float32)  # #FF2A2A
 WHITE = np.array([1.0, 1.0, 1.0], np.float32)
@@ -522,34 +524,149 @@ def spring_step(t, zeta=0.5, freq=5.0):
     return 1 - math.exp(-zeta * w * t) * (math.cos(wd * t) + zeta / math.sqrt(1 - zeta * zeta) * math.sin(wd * t))
 
 
+def cubic_bezier(x1, y1, x2, y2):
+    """CSS cubic-bezier timing function."""
+
+    def ev(x):
+        if x <= 0:
+            return 0.0
+        if x >= 1:
+            return 1.0
+        t = x
+        for _ in range(10):
+            xt = 3 * (1 - t) ** 2 * t * x1 + 3 * (1 - t) * t * t * x2 + t ** 3 - x
+            dx = 3 * (1 - t) ** 2 * x1 + 6 * (1 - t) * t * (x2 - x1) + 3 * t * t * (1 - x2)
+            if abs(dx) < 1e-7:
+                break
+            t = min(1.0, max(0.0, t - xt / dx))
+        return 3 * (1 - t) ** 2 * t * y1 + 3 * (1 - t) * t * t * y2 + t ** 3
+
+    return ev
+
+
+SITE_EASE = cubic_bezier(0.16, 1.0, 0.3, 1.0)  # the site's --ease
+SNAP_N = 32  # bar 2: the eye snaps open
+DIVE_END = 63.5  # inside the pupil; the track breathes until bar 4
+NAME = "NICOLÓ LOMBARDI"
+NAME_SIZE = 120
+NAME_CY = 500
+
+
+@lru_cache(maxsize=2)
+def name_glyphs():
+    """The title as one alpha mask plus per-letter column cuts, laid out like the site's h1
+    (Arial bold, -0.04em tracking, scaleX 1.08)."""
+    f = ImageFont.truetype(FONT_BOLD, NAME_SIZE)
+    asc, desc = f.getmetrics()
+    widths = [f.getlength(ch) for ch in NAME]
+    pad = NAME_SIZE // 2
+    tr = -0.04 * NAME_SIZE
+    im = Image.new("L", (int(sum(widths) + tr * (len(NAME) - 1)) + 2 * pad, asc + desc + pad), 0)
+    d = ImageDraw.Draw(im)
+    x, spans = float(pad), []
+    for ch, w in zip(NAME, widths):
+        d.text((x, pad // 2), ch, font=f, fill=255)
+        spans.append((x, x + w))
+        x += w + tr
+    bb = im.getbbox()
+    im = im.crop((bb[0], bb[1], bb[2], bb[3]))
+    im = im.resize((int(im.width * 1.08), im.height), Image.LANCZOS)
+    m = np.asarray(im).astype(np.float32) / 255.0
+    cuts = [0] + [int(round(((spans[k][1] + spans[k + 1][0]) / 2 - bb[0]) * 1.08)) for k in range(len(NAME) - 1)] + [m.shape[1]]
+    return m, cuts
+
+
+def title_layer(v):
+    """Alpha of the title at time v: letters rise 0.9em with the site's easing, 55 ms apart,
+    then the tagline, exactly like the home page reveal."""
+    m, cuts = name_glyphs()
+    a = np.zeros((H, W), np.float32)
+    mh, mw = m.shape
+    x0, y0 = int(W / 2 - mw / 2), int(NAME_CY - mh / 2)
+    for k in range(len(cuts) - 1):
+        e = SITE_EASE((v - 0.45 - 0.055 * k) / 1.1)
+        if e <= 0:
+            continue
+        rise = int(round(0.9 * NAME_SIZE * (1 - e)))
+        strip = m[:, cuts[k] : cuts[k + 1]]
+        ya, yb = y0 + rise, y0 + rise + mh
+        if ya < H:
+            yb2 = min(H, yb)
+            a[ya:yb2, x0 + cuts[k] : x0 + cuts[k + 1]] = np.maximum(
+                a[ya:yb2, x0 + cuts[k] : x0 + cuts[k + 1]], strip[: yb2 - ya] * e)
+    tg = text_mask("AI Production Specialist", FONT_BOLD, 34, 0.02, 1.0)
+    e = SITE_EASE((v - 0.25 - 1.2) / 1.1)
+    if e > 0:
+        th, tw = tg.shape
+        ty = int(y0 + mh + 34 + 0.9 * 34 * (1 - e))
+        tx = int(W / 2 - tw / 2)
+        a[ty : ty + th, tx : tx + tw] = np.maximum(a[ty : ty + th, tx : tx + tw], tg * e * 0.95)
+    return a
+
+
+def draw_title(img, v, scale=1.0, opacity=1.0, echo=10):
+    a = title_layer(v)
+    if scale != 1.0:
+        M = np.float32([[scale, 0, W / 2 - scale * W / 2], [0, scale, NAME_CY - scale * NAME_CY]])
+        a = cv2.warpAffine(a, M, (W, H), flags=cv2.INTER_LINEAR)
+    if echo:
+        e = np.roll(a, echo, axis=1)[..., None] * (0.5 * opacity)
+        img = img * (1 - e) + RED * e
+    a = a[..., None] * opacity
+    return img * (1 - a) + WHITE * a
+
+
+def eye_time(n, v):
+    # title: the eye drifts and looks around under heavy lids; from the snap on, a stretch of
+    # the loop where the pupil holds still, so the dive has a fixed target
+    return 6.0 + 0.9 * v if n < SNAP_N else 0.1 + 0.85 * (v - V(SNAP_N))
+
+
 def lid_intro(n):
-    if n < 9:
+    if n < SNAP_N:
         c = 0.9
-        for nk, depth in ((1.0, 0.18), (5.0, 0.32)):
+        for nk, depth in ((12.0, 0.16), (24.0, 0.3)):
             x = (n - nk) / 1.6
             if 0 <= x <= 1:
                 c -= depth * math.sin(math.pi * x)
+        if n >= 31.45:  # blink in the silence before bar 2
+            c = 0.9 + 0.1 * smooth(31.45, 31.75, n)
         return c
-    t = V(n) - V(9)
-    wide = -0.12 - 0.08 * smooth(14, 24.5, n)
-    return 0.9 + (wide - 0.9) * spring_step(t, 0.45, 4.2)
+    t = V(n) - V(SNAP_N)
+    wide = -0.12 - 0.08 * smooth(SNAP_N + 8, DIVE_END, n)
+    return 1.0 + (wide - 1.0) * spring_step(t, 0.45, 4.2)
 
 
 ZMAX = 22.0
 
 
 def zoom_intro(n):
-    if n < 9:
-        return 1.0 + 0.025 * n / 9
-    u = min(1.0, (n - 9) / 15.5)
-    z = math.exp(math.log(ZMAX) * u ** 3.4) * 1.025
-    z *= 1 + 0.07 * math.exp(-(V(n) - V(9)) / 0.12)  # snap punch
+    if n < SNAP_N:
+        return 1.0 + 0.04 * max(0.0, n) / SNAP_N
+    u = min(1.0, (n - SNAP_N) / (DIVE_END - SNAP_N))
+    z = 1.04 * math.exp(math.log(ZMAX / 1.04) * u ** 2.4)
+    z *= 1 + 0.07 * math.exp(-(V(n) - V(SNAP_N)) / 0.12)  # snap punch
     return z
 
 
-def pixel_tunnel(t, amount, cx, cy, seed=5, count=700, direction=1.0):
+TUNNEL_THUMBS = [("malik", 17.95), ("ktb04", 0.40), ("wpp", 66.60), ("z3z5", 17.20), ("fd1k", 27.30), ("vfrn", 7.20),
+                 ("i7mw", 23.00), ("lexus", 26.20), ("agu1", 5.60), ("mel1", 7.30), ("pgvx", 9.40), ("gwh2", 15.20),
+                 ("malik", 60.60), ("wpp", 28.40), ("ktb06", 4.00), ("lexus", 21.20)]
+
+
+@lru_cache(maxsize=1)
+def tunnel_thumbs():
+    out = []
+    for key, t_in in TUNNEL_THUMBS:
+        crop = KTB_CROP if key.startswith("ktb") else (WPP_CROP if key == "wpp" else None)
+        out.append(cam(clip_frame(key, t_in, 0.2), 1.0, 0.5, 0.5, "cover", crop, out=(320, 180)))
+    return out
+
+
+def pixel_tunnel(t, amount, cx, cy, seed=5, count=700, direction=1.0, textured=0.0):
     """Site-style pixel squares rushing out of (cx, cy): the inside of the eye.
-    Particles live in a cylinder and fly towards the camera; direction=-1 flies away."""
+    Particles live in a cylinder and fly towards the camera; direction=-1 flies away.
+    `textured` of them carry frames of the portfolio."""
     img = np.zeros((H, W, 3), np.float32)
     if amount <= 0.01:
         return img
@@ -558,58 +675,92 @@ def pixel_tunnel(t, amount, cx, cy, seed=5, count=700, direction=1.0):
     rad = 0.25 + r.random(count) * 1.6
     z0 = r.random(count) * 4.0
     red = r.random(count) < 0.18
+    tex = r.random(count) < textured
+    tid = r.integers(0, len(TUNNEL_THUMBS), count)
     travel = 1.6 * t + 2.2 * t * t  # accelerating
     z = (z0 - direction * travel) % 4.0 + 0.06
     sx = cx + np.cos(ang) * rad / z * 430
     sy = cy + np.sin(ang) * rad / z * 430
     size = np.clip(11.0 / z, 2, 140)
-    vis = (sx > -150) & (sx < W + 150) & (sy > -150) & (sy < H + 150)
+    vis = (sx > -250) & (sx < W + 250) & (sy > -150) & (sy < H + 150)
+    tiles = []
     for i in np.nonzero(vis)[0]:
         s = size[i]
-        q = 64.0 if s > 40 else 1.0  # big ones snap to the site's 64px grid feel
+        if tex[i] and s > 9:
+            tiles.append(i)
+            continue
         x0, y0 = sx[i] - s / 2, sy[i] - s / 2
         col = (float(RED[0]), float(RED[1]), float(RED[2])) if red[i] else (1.0, 1.0, 1.0)
         cv2.rectangle(img, (int(x0), int(y0)), (int(x0 + s), int(y0 + s)), col, -1)
     img = radial_blur(img, cx, cy, 0.18 * amount, 7)
+    if tiles:
+        thumbs = tunnel_thumbs()
+        lay = np.zeros((H, W, 3), np.float32)
+        msk = np.zeros((H, W), np.float32)
+        for i in sorted(tiles, key=lambda q: size[q]):  # far ones first
+            th = int(size[i] * 1.9)
+            tw = int(th * 16 / 9)
+            tile = cv2.resize(thumbs[tid[i]], (tw, th), interpolation=cv2.INTER_AREA if tw < 320 else cv2.INTER_LINEAR)
+            x0, y0 = int(sx[i] - tw / 2), int(sy[i] - th / 2)
+            xa, ya, xb, yb = max(0, x0), max(0, y0), min(W, x0 + tw), min(H, y0 + th)
+            if xb <= xa or yb <= ya:
+                continue
+            lay[ya:yb, xa:xb] = tile[ya - y0 : yb - y0, xa - x0 : xb - x0]
+            msk[ya:yb, xa:xb] = 1.0
+            if th > 24:  # thin white frame: little screens flying past
+                cv2.rectangle(lay, (x0, y0), (x0 + tw - 1, y0 + th - 1), (0.92, 0.92, 0.92), 2)
+        lay = radial_blur(lay, cx, cy, 0.015 * amount, 3)
+        msk = radial_blur(msk, cx, cy, 0.015 * amount, 3)[..., None]
+        img = img * (1 - msk) + lay
     return img * amount
 
 
 def scene_eye_intro(f, v):
     n = N(v)
-    if n >= 24.5:
+    if n >= DIVE_END:
         return np.zeros((H, W, 3), np.float32), {}
     Z = zoom_intro(n)
     c = lid_intro(n)
     centre = zoom_center(Z)
-    pix = smooth(3.0, 7.0, Z)
-    img = eye_view(0.25 + v, c, Z, centre, pix)
+    img = eye_view(eye_time(n, v), c, Z, centre, smooth(3.0, 7.0, Z))
     kc = smooth(1.4, 6.0, Z)
     if kc > 0:
         lo, hi = 0.16 * kc, 1.0 - 0.3 * kc
         img = np.clip((img - lo) / (hi - lo), 0, 1)
-    # exposure: CRT power-on, then a slightly dim "sleepy" prelude
-    if n < 9:
-        ft = f
-        if ft < 2:
+    if n < SNAP_N:
+        if f < 2:
             return np.zeros((H, W, 3), np.float32), {"hud": False}
-        if ft < 7:  # CRT line opening vertically
-            k = (ft - 2) / 5.0
+        if f < 7:  # CRT line opening vertically
+            k = (f - 2) / 5.0
             band = int(2 + k * k * H / 2)
             m = np.zeros((H, 1, 1), np.float32)
             m[H // 2 - band : H // 2 + band] = 1
             img = img * m * (1.6 - 0.8 * k) + (m * 0.35 * (1 - k))
-            return np.clip(img, 0, 1), {"hud": ft >= 5}
-        img = img * (0.78 + 0.06 * math.sin(f * 2.1))
-    # radial blur grows with zoom speed
-    if n >= 9:
+            return np.clip(img, 0, 1), {"hud": f >= 5}
+        img = img * (0.74 + 0.06 * math.sin(f * 2.1))
+        img = draw_title(img, v)
+        nb = 4 * math.floor(n / 4)  # a small chromatic pulse on every beat once the name is up
+        if nb >= 16:
+            img = rgb_split(img, 9 * math.exp(-(v - V(nb)) / 0.07))
+        if nb >= 16 and nb % 8 == 0 and v - V(nb) < 1.0 / FPS:
+            img = slices(img, rng_for("title", f), 4, 60, 4, 30)
+    else:
+        if n < SNAP_N + 6:  # the title blasts at the camera as the eye opens
+            k = max(0.0, (n - SNAP_N - 1) / 5.0)
+            img = draw_title(img, v, 1.0 + 2.6 * k * k, 1.0 - smooth(SNAP_N + 2, SNAP_N + 6, n), 16)
         dz = math.log(zoom_intro(n + 0.25) / Z) / (0.25 * SIX)  # d ln Z / dt
         px, py = pupil_screen(Z, centre)
         img = radial_blur(img, px, py, min(0.35, 0.02 * dz), 9 if dz > 2 else 6)
         amt = smooth(4.5, 15.0, Z)
-        if amt > 0.01:  # inside the pupil: the pixel tunnel
-            tun = pixel_tunnel(V(n) - V(18), amt, px, py)
+        if amt > 0.01:  # inside the pupil: the tunnel, with fragments of the work streaming past
+            tun = pixel_tunnel(V(n) - V(52), amt, px, py, textured=0.3)
             img = 1 - (1 - img) * (1 - tun)
-        ts = V(n) - V(9)
+        nb = 4 * math.floor(n / 4)  # chromatic pulse on each beat of the dive, a tear on the bar line
+        if nb >= SNAP_N + 4:
+            img = rgb_split(img, 12 * math.exp(-(v - V(nb)) / 0.07))
+            if nb % 16 == 0 and v - V(nb) < 1.0 / FPS:
+                img = slices(img, rng_for("dive", f), 6, 120, 4, 50)
+        ts = V(n) - V(SNAP_N)
         if ts < 1.0 / FPS:  # snap: one negative frame
             img = np.clip((1.0 - img) * 1.15, 0, 1)
         elif ts < 0.45:
@@ -618,7 +769,7 @@ def scene_eye_intro(f, v):
             img = rgb_split(img, 34 * math.exp(-ts / 0.09))
             if ts < 3.5 / FPS:
                 img = slices(img, r, 8, 170, 6, 80)
-    meta = {"reticle": (pupil_screen(Z, centre), Z) if 10 <= n < 23 and Z < 6 else None}
+    meta = {"reticle": (pupil_screen(Z, centre), Z) if SNAP_N + 5 <= n < DIVE_END - 5 and Z < 6 else None}
     return img, meta
 
 
@@ -685,22 +836,22 @@ FILES = {
 KTB_CROP = (212, 36, 1074, 640)  # inside the rounded film gate
 WPP_CROP = (0, 88, 1280, 632)  # inside the letterbox
 
-# S1 the eye opens
-shot(0, 25, "eye_intro")
-# S2 inside: the site boots
-shot(25, 33, "take", take="home_boot", t0=0.10, zoom=(1.65, 1.0), zdur=6, cy=0.5, site=True)
-shot(33, 41, "take", take="home_scroll", t0=0.0, zoom=(1.06, 1.06), smear=True, site=True)
-shot(41, 45, "take", take="gallery_unc", t0=V(2), zoom=(1.18, 1.1), site=True)
-shot(45, 49, "take", take="gallery_aguila", t0=V(2), zoom=(1.12, 1.2), site=True)
-shot(49, 53, "take", take="gallery_ktb", t0=V(2), zoom=(1.2, 1.12), site=True)
-shot(53, 56.25, "take", take="page_lexus", t0=0.2, zoom=(1.0, 1.12), site=True)
-shot(56.25, 57, "black")
-# S3 monitor wall -> push into the home tile -> click "about"
-shot(57, 66.5, "wall")
-shot(66.5, 75, "take", take="about_click", t0=None, zoom=(1.0, 1.0), site=True, about=True)
-# S4 break: 14 client logos, one per 16th
-shot(75, 89, "logos")
-# S5 drop
+# Timeline anchors (16th notes from the first downbeat)
+ABOUT_N, ABOUT_CLICK = 108, 1.4  # "about" is clicked on n 108 (1.4 s into the take)
+LOGO_N = 114  # break: logo k on n 114 + k
+DROP_N = 128  # bar 8
+WORDS_N = 192  # bar 12
+OUT_N = 208  # bar 13
+SHUT_N = 216  # last bar, hit 8: the eye slams shut
+CARD_N = 216.5  # NEW PORTFOLIO LIVE
+
+# S1 title, then the eye opens and we dive in (bars 0-3)
+shot(-1, 64, "eye_intro")
+# S2 inside: the portfolio (bars 4-5)
+shot(64, 72, "take", take="film_scroll", t0=0.0, zoom=(1.06, 1.06), smear=True, smear_from=2, site=True)
+shot(72, 76, "take", take="gallery_unc", t0=V(2), zoom=(1.18, 1.1), site=True)
+shot(76, 80, "take", take="gallery_aguila", t0=V(2), zoom=(1.12, 1.2), site=True)
+shot(80, 84, "take", take="gallery_ktb", t0=V(2), zoom=(1.2, 1.12), site=True)
 DROP = []
 
 
@@ -709,55 +860,66 @@ def d(n0, n1, key, t_in, grade="natural", fit="cover", crop=None, cx=0.5, cy=0.5
     shot(n0, n1, "clip", key=key, t_in=t_in, grade=grade, fit=fit, crop=crop, cx=cx, cy=cy, zoom=zoom, speed=speed, tag=tag)
 
 
+d(84, 86, "lexus", 6.40, "natural", cy=0.6, zoom=(1.14, 1.02), tag="lexus")  # full frame, no side borders
+d(86, 88, "lexus", 21.20, "natural", cy=0.56, zoom=(1.0, 1.1), tag="lexus")
+shot(88, 92, "take", take="gallery_melia", t0=V(4), zoom=(1.12, 1.04), site=True)
+shot(92, 95.1, "take", take="gallery_unc", t0=2.45, zoom=(1.0, 1.1), site=True)
+shot(95.1, 96, "black")
+# S3 monitor wall -> push into the El Aguila tile -> click "about" (bar 6)
+shot(96, 105.5, "wall")
+shot(105.5, LOGO_N, "take", take="about_click2", t0=None, zoom=(1.0, 1.0), site=True, about=True)
+# S4 break: 14 client logos, one per 16th (bar 7)
+shot(LOGO_N, DROP_N, "logos")
+# S5 drop (bars 8-11)
 # bar 8 : Malik Cross (B&W boxing)
-d(89, 92, "malik", 17.95, "bw", cx=0.55, zoom=(1.18, 1.05), tag="malik")
-d(92, 93, "malik", 5.80, "bw", tag="malik")
-d(93, 95, "malik", 15.10, "invert", tag="malik")
-d(95, 97, "malik", 0.80, "bw", zoom=(1.1, 1.2), tag="malik")
-shot(97, 99, "take", take="page_malik", t0=0.35, zoom=(1.0, 1.04), site=True, tag="malik")
-d(99, 101, "malik", 60.60, "redkey", zoom=(1.0, 1.12), tag="malik")
-d(101, 103, "malik", 36.20, "thermal", tag="malik")
-d(103, 105, "malik", 58.10, "natural", tag="malik")
+d(128, 131, "malik", 17.95, "bw", cx=0.55, zoom=(1.18, 1.05), tag="malik")
+d(131, 132, "malik", 5.80, "bw", tag="malik")
+d(132, 134, "malik", 15.10, "invert", tag="malik")
+d(134, 136, "malik", 0.80, "bw", zoom=(1.1, 1.2), tag="malik")
+shot(136, 138, "take", take="page_malik", t0=0.35, zoom=(1.0, 1.04), site=True, tag="malik")
+d(138, 140, "malik", 60.60, "redkey", zoom=(1.0, 1.12), tag="malik")
+d(140, 142, "malik", 36.20, "thermal", tag="malik")
+d(142, 144, "malik", 58.10, "natural", tag="malik")
 # bar 9 : Kill the Boy VFX + WPP virtual production
-d(105, 108, "ktb04", 0.40, "natural", crop=KTB_CROP, cx=0.62, cy=0.52, zoom=(1.25, 1.6), tag="ktb")
-d(108, 109, "ktb06", 4.00, "natural", crop=KTB_CROP, tag="ktb")
-d(109, 111, "ktb", 81.20, "bw", crop=KTB_CROP, tag="ktb")
-shot(111, 113, "take", take="gallery_ktb", t0=V(14), zoom=(1.0, 1.06), site=True, tag="ktb")
-d(113, 115, "wpp", 28.40, "natural", crop=WPP_CROP, tag="wpp")
-d(115, 117, "wpp", 66.60, "natural", crop=WPP_CROP, cx=0.45, tag="wpp")
-d(117, 120.55, "wpp", 57.60, "natural", crop=WPP_CROP, zoom=(1.0, 1.15), tag="wpp")
-shot(120.55, 121, "black")
+d(144, 147, "ktb04", 0.40, "natural", crop=KTB_CROP, cx=0.62, cy=0.52, zoom=(1.25, 1.6), tag="ktb")
+d(147, 148, "ktb06", 4.00, "natural", crop=KTB_CROP, tag="ktb")
+d(148, 150, "ktb", 81.20, "bw", crop=KTB_CROP, tag="ktb")
+shot(150, 152, "take", take="gallery_ktb", t0=V(14), zoom=(1.0, 1.06), site=True, tag="ktb")
+d(152, 154, "wpp", 28.40, "natural", crop=WPP_CROP, tag="wpp")
+d(154, 156, "wpp", 66.60, "natural", crop=WPP_CROP, cx=0.45, tag="wpp")
+d(156, 159.45, "wpp", 57.60, "natural", crop=WPP_CROP, zoom=(1.0, 1.15), tag="wpp")
+shot(159.45, 160, "black")
 # bar 10 : UNCOMMONSENSE -> site carousel, then a vertical triptych
-shot(121, 124, "take", take="gallery_unc", t0=V(14), zoom=(1.12, 1.0), site=True, tag="unc")
-shot(124, 133, "trip", tag="unc", panels=[
+shot(160, 163, "take", take="gallery_unc", t0=V(14), zoom=(1.12, 1.0), site=True, tag="unc")
+shot(163, 172, "trip", tag="unc", panels=[
     # (panel, n_on, key, t_in, grade)
-    (0, 124, "vfrn", 7.20, "natural"),
-    (1, 125, "z3z5", 17.20, "natural"),
-    (2, 127, "pgvx", 9.40, "natural"),
-    (0, 129, "fd1k", 27.30, "natural"),
-    (1, 129, "gwh2", 15.20, "natural"),
-    (2, 129, "fd1k", 12.40, "natural"),
-    (0, 131, "ste4", 8.60, "natural"),
-    (1, 131, "i7mw", 5.20, "natural"),
-    (2, 131, "gwh2", 3.00, "natural"),
+    (0, 163, "vfrn", 7.20, "natural"),
+    (1, 164, "z3z5", 17.20, "natural"),
+    (2, 166, "pgvx", 9.40, "natural"),
+    (0, 168, "fd1k", 27.30, "natural"),
+    (1, 168, "gwh2", 15.20, "natural"),
+    (2, 168, "fd1k", 12.40, "natural"),
+    (0, 170, "ste4", 8.60, "natural"),
+    (1, 170, "i7mw", 5.20, "natural"),
+    (2, 170, "gwh2", 3.00, "natural"),
 ])
-d(133, 137, "i7mw", 23.00, "natural", fit="cover", cy=0.5, zoom=(1.0, 1.18), tag="unc")
-# bar 11 : Lexus / El Aguila / Melia
-shot(137, 140, "take", take="page_lexus", t0=1.2, zoom=(1.0, 1.08), site=True, tag="lexus")
-d(140, 141, "lexus", 26.20, "natural", cy=0.52, tag="lexus")
-shot(141, 143, "take", take="gallery_aguila", t0=V(10), zoom=(1.06, 1.0), site=True, tag="aguila")
-shot(143, 147, "trip", tag="melia", panels=[
-    (0, 143, "mel1", 7.30, "natural"),
-    (1, 144, "agu1", 5.60, "natural"),
-    (2, 145, "mel1", 10.20, "natural"),
+d(172, 176, "i7mw", 23.00, "natural", fit="cover", cy=0.5, zoom=(1.0, 1.18), tag="unc")
+# bar 11 : Lexus (full frame) / El Aguila / Melia
+d(176, 179, "lexus", 24.60, "natural", cy=0.6, zoom=(1.16, 1.0), tag="lexus")
+d(179, 180, "lexus", 26.20, "natural", cy=0.52, tag="lexus")
+shot(180, 182, "take", take="gallery_aguila", t0=V(10), zoom=(1.06, 1.0), site=True, tag="aguila")
+shot(182, 186, "trip", tag="melia", panels=[
+    (0, 182, "mel1", 7.30, "natural"),
+    (1, 183, "agu1", 5.60, "natural"),
+    (2, 184, "mel1", 10.20, "natural"),
 ])
-d(147, 149, "lexus", 29.40, "natural", cy=0.5, tag="lexus")
-shot(149, 151.7, "take", take="gallery_melia", t0=V(4), zoom=(1.1, 1.0), site=True, tag="melia")
-shot(151.7, 153, "strobe")
-# S6 overdrive words + close
-shot(153, 168.5, "words")
-shot(168.5, 169, "black")
-shot(169, 185, "eye_outro")
+d(186, 188, "lexus", 29.40, "natural", cy=0.5, tag="lexus")
+shot(188, 190.7, "take", take="gallery_melia", t0=V(4), zoom=(1.1, 1.0), site=True, tag="melia")
+shot(190.7, WORDS_N, "strobe")
+# S6 overdrive words + close (bars 12-13)
+shot(WORDS_N, 207.45, "words")
+shot(207.45, OUT_N, "black")
+shot(OUT_N, END_N + 40, "eye_outro")
 
 # Flash frames for the bar-12 montage (one per 16th)
 FLASH = [
@@ -766,7 +928,7 @@ FLASH = [
     ("ktb06", 6.00, "natural"), ("wpp", 58.60, "natural"), ("mel1", 7.80, "natural"), ("gwh2", 18.40, "natural"),
     ("malik", 18.30, "bw"), ("ktb04", 1.60, "natural"), ("vfrn", 8.40, "natural"), ("i7mw", 24.00, "natural"),
 ]
-WORDS = [(153, ["AI FILMMAKER"]), (157, ["CREATIVE", "TECHNOLOGIST"]), (161, ["ART DIRECTOR"]), (165, None)]
+WORDS = [(WORDS_N, ["AI FILMMAKER"]), (WORDS_N + 4, ["CREATIVE", "TECHNOLOGIST"]), (WORDS_N + 8, ["ART DIRECTOR"]), (WORDS_N + 12, None)]
 
 LOGOS = ["cocacola", "heineken", "lexus", "toyota", "boots", "soapglory", "melia", "aguila", "osborne", "anaya",
          "wpp", "wichita", "graphomedia", "uncommonsense"]
@@ -774,19 +936,22 @@ LOGO_NAMES = ["COCA-COLA", "HEINEKEN", "LEXUS", "TOYOTA", "BOOTS", "SOAP & GLORY
               "EL ÁGUILA", "OSBORNE", "ANAYA", "WPP PRODUCTION", "WICHITA PRODUCTION", "GRAPHOMEDIA", "UNCOMMONSENSE"]
 LOGO_RATIO = [3.184, 1.986, 2.228, 7.639, 1.885, 4.624, 2.077, 1.062, 7.289, 4.306, 9.475, 0.712, 1.792, 13.03]
 
-# audio gaps inside the break (v seconds): the stutter gate is closed
-GATES = [(9.949, 9.999), (10.084, 10.134), (10.219, 10.274), (10.319, 10.339), (10.389, 10.409), (10.524, 10.544),
-         (10.624, 10.679), (10.759, 10.814), (11.299, 11.354), (11.399, 11.419), (11.459, 11.489), (11.569, 11.624),
-         (11.704, 11.759)]
+# audio gaps inside the break (track seconds): the stutter gate is closed
+GATES_SRC = [(15.240, 15.290), (15.375, 15.425), (15.510, 15.565), (15.610, 15.630), (15.680, 15.700), (15.815, 15.835),
+             (15.915, 15.970), (16.050, 16.105), (16.590, 16.645), (16.690, 16.710), (16.750, 16.780), (16.860, 16.915),
+             (16.995, 17.050)]
+GATES = [(a - AUDIO_IN, b - AUDIO_IN) for a, b in GATES_SRC]
 
 # 808 pattern of the drop, bars 8..13: offsets in 16ths and strength
 HITS = []
 for bar in range(8, 14):
-    nb = 89 + 16 * (bar - 8)
-    for off, s in ((0, 1.0), (3, 0.7), (4, 0.55), (6, 0.7), (8, 0.85), (10, 0.7), (12, 0.8)):
-        HITS.append((nb + off, s))
-HITS += [(9, 1.0), (25, 0.9), (29, 0.3), (33, 0.5), (37, 0.35), (41, 0.6), (43, 0.3), (45, 0.5), (47, 0.3), (49, 0.5),
-         (51, 0.3), (53, 0.5), (55, 0.3), (57, 0.8), (59, 0.3), (61, 0.45), (63, 0.45), (65, 0.4), (67, 0.3), (69, 0.6)]
+    nb = DROP_N + 16 * (bar - 8)
+    for off, s_ in ((0, 1.0), (3, 0.7), (4, 0.55), (6, 0.7), (8, 0.85), (10, 0.7), (12, 0.8)):
+        HITS.append((nb + off, s_))
+# lighter pulses on the 8ths through the site section, the wall and the click
+HITS += [(64, 0.9), (66, 0.35), (68, 0.35), (70, 0.35), (72, 0.6), (74, 0.3), (76, 0.5), (78, 0.3), (80, 0.5), (82, 0.3),
+         (84, 0.6), (86, 0.45), (88, 0.5), (90, 0.3), (92, 0.5), (94, 0.3), (96, 0.8), (98, 0.3), (100, 0.45),
+         (102, 0.45), (104, 0.4), (106, 0.3), (108, 0.6)]
 HITS.sort()
 
 
@@ -810,8 +975,8 @@ def find_shot(n):
 # ------------------------------------------------------------------ scene renderers
 def render_take(s, v, f):
     lt = v - V(s["n0"])
-    if s.get("about"):  # click lands on n 69
-        t = lt + (V(s["n0"]) - (V(69) - 0.5))
+    if s.get("about"):  # the click (ABOUT_CLICK s into the take) lands on ABOUT_N
+        t = v - (V(ABOUT_N) - ABOUT_CLICK)
     else:
         t = s["t0"] + lt
     z0, z1 = s["zoom"]
@@ -821,17 +986,17 @@ def render_take(s, v, f):
     src = take_frame(s["take"], t)
     img = cam(src, z, 0.5, s.get("cy", 0.5))
     if s.get("smear"):  # vertical motion smear while the page snaps
-        loc = t / SIX
+        loc = t / SIX - s.get("smear_from", 0)
         k16 = loc % 2.0
-        if k16 < 1.2:
+        if loc >= 0 and k16 < 1.2:
             sp = math.sin(math.pi * k16 / 1.2)
             ln = int(2 + 46 * sp)
             if ln > 3:
                 img = cv2.blur(img, (1, ln))
     if s.get("about"):
         n = N(v)
-        if n >= 73:  # push into the "Selected clients" strip
-            k2 = ease_io((n - 73) / 2.0)
+        if n >= ABOUT_N + 4:  # push into the "Selected clients" strip
+            k2 = ease_io((n - ABOUT_N - 4) / 2.0)
             img = cam(src, 1.0 + 1.0 * k2, 0.5 - 0.2 * k2, 0.5 + 0.32 * k2)
     return img
 
@@ -875,18 +1040,20 @@ def render_trip(s, v, f):
 
 def render_wall(s, v, f):
     n = N(v)
+    n0 = s["n0"]
+    push0 = s["n1"] - 2.5
     tiles = [
-        ("page_malik", 0.3 + (v - V(57)), "CAM_01 // MALIK CROSS"),
-        ("gallery_unc", V(10) + (v - V(57)), "CAM_02 // UNCOMMONSENSE"),
-        ("gallery_ktb", V(10) + (v - V(57)), "CAM_03 // KILL THE BOY"),
-        ("about_click", (v - (V(69) - 0.5)), "CAM_04 // NICOLO-LOMBARDI.COM"),
+        ("page_malik", 0.3 + (v - V(n0)), "CAM_01 // MALIK CROSS"),
+        ("gallery_unc", V(10) + (v - V(n0)), "CAM_02 // UNCOMMONSENSE"),
+        ("gallery_ktb", V(10) + (v - V(n0)), "CAM_03 // KILL THE BOY"),
+        ("about_click2", v - (V(ABOUT_N) - ABOUT_CLICK), "CAM_04 // EL ÁGUILA"),
     ]
-    # push into the home tile (bottom right) over n 64 -> 66.5
-    k = ease_io((n - 64.0) / 2.5)
-    z = 1.0 + k + 0.035 * min(1.0, (n - 57) / 7.0) * (1 - k)  # slow drift, then 1 -> 2
+    # push into the El Aguila tile (bottom right), where the cursor will click "about"
+    k = ease_io((n - push0) / 2.5)
+    z = 1.0 + k + 0.035 * min(1.0, (n - n0) / 7.0) * (1 - k)  # slow drift, then 1 -> 2
     canvas = np.zeros((H * 2, W * 2, 3), np.float32)
     for i, (tk, t, name) in enumerate(tiles):
-        on_at = 57 + i * 0.75
+        on_at = n0 + i * 0.75
         tx, ty = (i % 2) * W, (i // 2) * H
         if n < on_at:
             continue
@@ -895,7 +1062,7 @@ def render_wall(s, v, f):
         if lt < 2 / FPS:
             tile = np.clip(tile + 0.6, 0, 1)
         r = rng_for("wall", i, int(n * 2))
-        if 61 <= n < 64 and r.random() < 0.3:
+        if n0 + 4 <= n < push0 and r.random() < 0.3:
             tile = slices(tile, r, 4, 90) if r.random() < 0.6 else 1.0 - tile
         canvas[ty : ty + H, tx : tx + W] = tile
         label(canvas, name, tx + 40, ty + H - 40, 32, WHITE, 0.9, anchor="bl")
@@ -921,8 +1088,8 @@ def in_gate(v):
 
 def render_logos(s, v, f):
     n = N(v)
-    k = int(min(13, max(0, math.floor(n - 75))))
-    lt = v - V(75 + k)
+    k = int(min(13, max(0, math.floor(n - LOGO_N))))
+    lt = v - V(LOGO_N + k)
     r = rng_for("logo", k, f)
     img = np.zeros((H, W, 3), np.float32)
     # faint moving grid
@@ -953,8 +1120,8 @@ def render_logos(s, v, f):
     label(img, LOGO_NAMES[k], W / 2, H - 112, 16, WHITE, 0.85, anchor="tc")
     if in_gate(v):
         img = img * 0.38
-    if n >= 88.55:  # white-out into the drop
-        img = np.clip(img + 0.35 + 0.65 * smooth(88.55, 88.85, n), 0, 1)
+    if n >= DROP_N - 0.45:  # white-out into the drop
+        img = np.clip(img + 0.35 + 0.65 * smooth(DROP_N - 0.45, DROP_N - 0.15, n), 0, 1)
     return img
 
 
@@ -972,9 +1139,9 @@ def render_strobe(s, v, f):
 
 def render_words(s, v, f):
     n = N(v)
-    k = int(min(15, max(0, math.floor(n - 153))))
+    k = int(min(15, max(0, math.floor(n - WORDS_N))))
     key, t_in, gr = FLASH[k]
-    lt = v - V(153 + k)
+    lt = v - V(WORDS_N + k)
     crop = KTB_CROP if key.startswith("ktb") else (WPP_CROP if key == "wpp" else None)
     bg = cam(clip_frame(key, t_in, lt), 1.08 + 0.1 * math.exp(-lt / 0.08), 0.5, 0.5, "cover", crop)
     mode = ("dither_red", "bw", "redwash", "dither")[k % 4]
@@ -1001,35 +1168,33 @@ def render_words(s, v, f):
             img = slices(img, r, 9, 200)
         label(img, "NICOLÓ LOMBARDI //", 58, 92, 16, WHITE, 0.85)
     else:
-        # n 165 -> 168.5: the site's pixel curtain swallows the frame
-        cur = pixel_curtain((v - V(165)) * 1000 * 0.86, 909)
-        if cur is not None and (v - V(165)) * 1000 * 0.86 < 380 + 70:
+        # last beat of bar 12: the site's pixel curtain swallows the frame
+        tc = (v - V(WORDS_N + 12)) * 1000 * 0.86
+        cur = pixel_curtain(tc, 909)
+        if cur is not None and tc < 380 + 70:
             img = apply_curtain(img, cur)
-        elif (v - V(165)) * 1000 * 0.86 >= 380 + 70:
+        elif tc >= 380 + 70:
             img = apply_curtain(np.zeros_like(img), cur)
     return img
 
 
 def lid_outro(n):
-    if n < 181:
+    if n < SHUT_N:
         return -0.12
-    t = V(n) - V(181)
+    t = V(n) - V(SHUT_N)
     return -0.12 + 1.12 * min(1.0, spring_step(t, 0.8, 7.0))
 
 
 def scene_eye_outro(s, v, f):
     n = N(v)
-    lt = v - V(169)
-    if n >= 182.2:
-        img = np.zeros((H, W, 3), np.float32)
-        return img
+    lt = v - V(OUT_N)
     # exit through the pupil: 22x -> 1x
     k = ease_out(lt / V(3.0), 4.0)
     Z = math.exp(math.log(ZMAX) * (1 - k))
     Z *= 1 + 0.06 * math.exp(-(v - V(last_hit(n)[0])) / 0.1)
     centre = zoom_center(Z)
     c = lid_outro(n)
-    img = eye_view(6.0 + lt, c, Z, centre, smooth(3.0, 7.0, Z))
+    img = eye_view(0.1 + lt, c, Z, centre, smooth(3.0, 7.0, Z))
     kc = smooth(1.4, 6.0, Z)
     if kc > 0:
         lo, hi = 0.16 * kc, 1.0 - 0.3 * kc
@@ -1044,26 +1209,20 @@ def scene_eye_outro(s, v, f):
             img = 1 - (1 - img) * (1 - tun)
     img = img * 0.8
     # lockup
-    if n >= 172:
-        wl = v - V(172)
-        nm = "NICOLÓ LOMBARDI"
-        m = text_mask(nm, FONT_BOLD, 150, -0.04, 1.08)
-        x0 = (W - m.shape[1]) / 2
-        y0 = H / 2 - m.shape[0] / 2 - 30
-        # site-style letter rise, compressed into a few frames
-        lm = text_mask(nm, FONT_BOLD, 150, -0.04, 1.08)
-        rise = int(40 * (1 - ease_out(wl / 0.18)))
+    if n >= OUT_N + 3:
+        wl = v - V(OUT_N + 3)
+        lm = text_mask(NAME, FONT_BOLD, 150, -0.04, 1.08)
+        x0 = (W - lm.shape[1]) / 2
+        y0 = H / 2 - lm.shape[0] / 2 - 30
+        rise = int(40 * (1 - ease_out(wl / 0.18)))  # site-style letter rise, compressed
         op = min(1.0, wl / 0.1)
         paste(img, lm, x0 + 10, y0 + rise, RED, 0.6 * op)
         paste(img, lm, x0, y0 + rise, WHITE, op)
-    if n >= 173:
+    if n >= OUT_N + 4:
         tg = text_mask("AI PRODUCTION SPECIALIST", FONT_BOLD, 38, 0.02, 1.0)
         paste(img, tg, (W - tg.shape[1]) / 2, H / 2 + 70, WHITE, 0.95)
-    if n >= 175:
-        um = text_mask("NICOLO-LOMBARDI.COM", FONT_PIXEL, 32)
-        paste(img, um, (W - um.shape[1]) / 2, H / 2 + 140, RED, 1.0)
-    if n >= 181:  # the eye slams shut: negative frame, then tears
-        ts = v - V(181)
+    if n >= SHUT_N:  # the eye slams shut: negative frame, then tears
+        ts = v - V(SHUT_N)
         if ts < 1.0 / FPS:
             img = np.clip((1.0 - img) * 1.1, 0, 1)
         else:
@@ -1072,14 +1231,44 @@ def scene_eye_outro(s, v, f):
 
 
 def render_end_card(v, f):
+    """NEW PORTFOLIO / (blinking) LIVE, held after the music cuts out."""
     n = N(v)
+    lt = v - V(CARD_N)
+    r = rng_for("card", f)
     img = np.zeros((H, W, 3), np.float32)
-    if n < 182.2:
-        return img
-    on = not (183.0 <= n < 183.35 or 184.0 <= n < 184.35)
-    if on:
-        um = text_mask("NICOLO-LOMBARDI.COM", FONT_PIXEL, 32)
-        paste(img, um, (W - um.shape[1]) / 2, H / 2 - um.shape[0] / 2, WHITE, 0.95)
+    gx = int((f * 9) % 48)  # the logo strobe's faint grid
+    img[:, gx::48] += 0.035
+    img[(f * 5) % 48 :: 48, :] += 0.035
+    big = 196
+    m1 = text_mask("NEW PORTFOLIO", FONT_BOLD, big, -0.04, 1.08)
+    m2 = text_mask("LIVE", FONT_BOLD, big, -0.04, 1.08)
+    um = text_mask("NICOLO-LOMBARDI.COM", FONT_PIXEL, 32)
+    z = 1.0 + 0.12 * math.exp(-lt / 0.06)
+    jx = int(r.integers(-50, 51)) if lt < 1.5 / FPS else 0
+    y1 = 300
+    x1 = (W - m1.shape[1]) / 2 + jx
+    paste(img, m1, x1 + 12, y1, RED, 0.55)
+    paste(img, m1, x1, y1, WHITE, 1.0)
+    dot = int(big * 0.21)
+    gap = int(big * 0.2)
+    gw = 2 * dot + gap + m2.shape[1]
+    x2 = (W - gw) / 2 - jx
+    y2 = y1 + m1.shape[0] + 70
+    if (n % 4) < 2.0:  # the dot blinks on every beat, and keeps going after the music stops
+        cv2.circle(img, (int(x2 + dot), int(y2 + m2.shape[0] / 2)), dot, tuple(float(c) for c in RED), -1, cv2.LINE_AA)
+    paste(img, m2, x2 + 2 * dot + gap, y2, RED, 1.0)
+    paste(img, um, (W - um.shape[1]) / 2, y2 + m2.shape[0] + 80, WHITE, 0.9)
+    img = scale_about(img, z)
+    # glitch only while the music still plays: entrance, the last 808s, the last hats
+    if n < END_N:
+        for hn, amp in ((CARD_N, 30.0), (218, 16.0), (220, 16.0), (222, 10.0), (223, 10.0)):
+            dt = v - V(hn)
+            if 0 <= dt < 0.25:
+                img = rgb_split(img, amp * math.exp(-dt / 0.06))
+                if dt < 1.0 / FPS or (hn == CARD_N and dt < 2.0 / FPS):
+                    img = slices(img, r, 7, 160, 6, 70)
+    else:
+        img = rgb_split(img, 2.0)
     # CRT power-off in the last frames
     if f >= NF - 3:
         k = (f - (NF - 3)) / 3.0
@@ -1112,7 +1301,7 @@ def base_frame(f, v):
     elif kind == "words":
         img = render_words(s, v, f)
     elif kind == "eye_outro":
-        img = scene_eye_outro(s, v, f) if n < 182.2 else render_end_card(v, f)
+        img = scene_eye_outro(s, v, f) if n < CARD_N else render_end_card(v, f)
     else:
         img = np.zeros((H, W, 3), np.float32)
     return idx, s, img, meta
@@ -1127,7 +1316,7 @@ def render_frame(f):
 
     # cut accents on the beat grid
     hit = last_hit(n)
-    accents = kind in ("clip", "take", "trip", "wall", "eye_outro", "strobe") and n < 182
+    accents = kind in ("clip", "take", "trip", "wall", "eye_outro", "strobe") and n < CARD_N
     if hit and accents:
         dt = v - V(hit[0])
         st = hit[1]
@@ -1137,7 +1326,7 @@ def render_frame(f):
             img = np.clip(img * (1 + 0.85 * st * e) + 0.05 * st * e, 0, 1)
             img = rgb_split(img, 26 * st * math.exp(-dt / 0.07))
     # tear between shots on their first frame(s)
-    span = 2.0 if (s["n0"] - 89) % 16 == 0 or s["n0"] in (25, 121, 137) else 1.0
+    span = 2.0 if (s["n0"] - DROP_N) % 16 == 0 or s["n0"] in (64, 160, 176) else 1.0
     first = 0 <= (n - s["n0"]) * SIX < span / FPS
     if first and kind in ("clip", "take", "trip") and idx > 0:
         prev = SHOTS[idx - 1]
@@ -1169,8 +1358,10 @@ def render_frame(f):
             img = hud(img, v, site=True)
     elif kind == "wall":
         img = hud(img, v, "LIVE // NICOLO-LOMBARDI.COM", None, site=True)
-    elif kind == "eye_outro" and n < 182.2:
+    elif kind == "eye_outro" and n < CARD_N:
         img = hud(img, v, url=False)
+    elif kind == "eye_outro":
+        img = brackets(img)
 
     grain = 0.038 if kind not in ("black",) else 0.025
     img = post(img, f, grain=grain, scan=kind != "black")
@@ -1244,14 +1435,31 @@ def cmd_render(workers=4, first=0, last=NF):
 
 def cmd_encode():
     audio = os.path.join(OUT, "music.wav")
+    import wave
+
+    with wave.open(AUDIO) as w:
+        music = w.getnframes() / w.getframerate() - AUDIO_IN
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{AUDIO_IN:.5f}", "-i", AUDIO, "-af",
-                    f"afade=t=in:st=0:d=0.35,apad=whole_dur={NF / FPS:.3f},afade=t=out:st={NF / FPS - 0.06:.3f}:d=0.06",
+                    f"afade=t=in:st=0:d=0.05,afade=t=out:st={music - 0.02:.3f}:d=0.02,apad=whole_dur={NF / FPS:.3f}",
                     "-t", f"{NF / FPS:.3f}", "-ar", "48000", audio], check=True)
     out = os.path.join(OUT, "reel.mp4")
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-framerate", str(FPS), "-i", os.path.join(OUT, "frames", "%04d.png"),
                     "-i", audio, "-c:v", "libx264", "-preset", "slow", "-crf", "18", "-maxrate", "24M", "-bufsize", "48M",
                     "-pix_fmt", "yuv420p", "-profile:v", "high", "-tune", "film", "-c:a", "aac", "-b:a", "320k", "-movflags", "+faststart",
                     "-shortest", out], check=True)
+    print(out)
+
+
+def cmd_share(mbit=7.3):
+    """Two-pass copy under 30 MB for messaging; the master stays at CRF 18."""
+    src = os.path.join(OUT, "frames", "%04d.png")
+    out = os.path.join(OUT, "reel-share.mp4")
+    common = ["-framerate", str(FPS), "-i", src]
+    venc = ["-c:v", "libx264", "-preset", "slow", "-b:v", f"{mbit}M", "-maxrate", "11M", "-bufsize", "16M",
+            "-pix_fmt", "yuv420p", "-profile:v", "high", "-tune", "film", "-passlogfile", os.path.join(OUT, "x264pass")]
+    subprocess.run(["ffmpeg", "-v", "error", "-y", *common, *venc, "-pass", "1", "-an", "-f", "mp4", os.devnull], check=True)
+    subprocess.run(["ffmpeg", "-v", "error", "-y", *common, "-i", os.path.join(OUT, "music.wav"), *venc, "-pass", "2",
+                    "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", "-shortest", out], check=True)
     print(out)
 
 
@@ -1262,11 +1470,13 @@ if __name__ == "__main__":
     elif cmd == "still":
         cmd_still([int(x) for x in sys.argv[2:]])
     elif cmd == "beats":
-        cmd_still(sorted({int(round(V(n) * FPS)) for n in range(0, 185, 4)}))
+        cmd_still(sorted({min(NF - 1, int(round(V(n) * FPS))) for n in range(0, END_N + 5, 4)} | {NF - 10, NF - 2}))
     elif cmd == "render":
         cmd_render(int(os.environ.get("WORKERS", "4")))
         cmd_encode()
     elif cmd == "encode":
         cmd_encode()
+    elif cmd == "share":
+        cmd_share()
     else:
         print(__doc__)

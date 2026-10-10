@@ -1,75 +1,83 @@
 # Nicoló Lombardi — Cybercore Portfolio Reel
 
-25.000 s · 1920×1080 (16:9) · 30 fps · music: 2hollis, "poster boy" (user-supplied)
+30.87 s (the full 30.27 s track + 0.6 s end card in silence) · 1920×1080 (16:9) · 30 fps · music: 2hollis, "poster boy" (user-supplied)
+
+**v2 changes:** the reel uses the whole track. The title NICOLÓ LOMBARDI comes first; the eye then opens and the dive goes straight through the tunnel into the portfolio, with no cut back to the home page. The "about" click happens on a project page, so the eye never repeats mid-reel. The Lexus shots are full-frame, with no black side borders. The reel ends on NEW PORTFOLIO ● LIVE.
 
 ## Brief
 
 - **Reference/medium:** hyperpop / rage music-video edit meets cybercore screen-capture. Monochrome like the site (black, white, the halftone anime eye) with one accent, signal red `#FF2A2A`, plus the red/cyan fringes from RGB-split glitches. CRT scanlines, 1-bit dither, the site's own black-and-white "pixel curtain" squares used as the glitch vocabulary.
 - **Engine:** Playwright (frame-exact captures of the live site, using virtual time) + Python/NumPy/OpenCV compositor + ffmpeg. Every frame is a pure function of time.
-- **Motif:** THE EYE. It opens at the start, the camera dives into the pupil, eyes come back through the cut (KTB owl eye, anime eyes, balaclava eyes), and the eye slams shut on the last hit.
-- **Banned:** cross-dissolves and slow fades in the drop, matrix rain, lens flares, particle bursts, light leaks, spinning sci-fi HUD circles, bouncy or elastic easing, centred text on a gradient, identical glitch presets on every cut (parameters are seeded per cut), any hold longer than 1 beat after the drop, invented claims (all text comes from the site).
-- **Hard rule:** no Soap & Glory imagery. Its logo appears once, in the client-logo sequence only. The `/visuals/` page (which opens on Soap & Glory) is never recorded, and the WPP page is never scrolled down to its "Next project: Soap & Glory" link.
+- **Motif:** THE EYE. It opens after the title, the camera dives into the pupil, eyes come back through the cut (KTB owl eye, anime eyes, balaclava eyes), and the eye slams shut on the last-bar hit before the end card.
+- **Banned:** cross-dissolves and slow fades in the drop, matrix rain, lens flares, light leaks, spinning sci-fi HUD circles, bouncy or elastic easing, centred text on a gradient, identical glitch presets on every cut (parameters are seeded per cut), any hold longer than 1 beat after the drop, invented claims (all text comes from the site), black side borders around vertical video (it either fills the frame or sits in a triptych / the site's own carousel).
+- **Hard rule:** no Soap & Glory imagery. Its logo appears in the client-logo sequence (and on the About panel's client strip the camera pushes past). The `/visuals/` page (which opens on Soap & Glory) is never recorded, and no page is scrolled down to a "Next project: Soap & Glory" link.
 
 ## Music edit and beat grid
 
 - Track analysis (numpy/scipy spectral flux + comb filter): **111.0 BPM**, grid origin 0.021 s. Silence gaps before bars 2/4/6/10/12/13 land exactly on the grid, which confirms it.
-- Structure of the 30.25 s clip: intro arpeggio (bars 0–6) → gated stutter **break** (bar 7, 15.14 s) → 808 **drop** (bar 8, 17.32 s) → to the end.
-- **Edit:** source 5.291 s → 30.246 s, plus 45 ms of silence, so the reel ends exactly on the downbeat where the track cuts out. Quick fade-in at the head.
-- Timeline unit: one 16th note, `n`. `v = n × 0.135135 s`, frame = `n × 4.054`. The reel is n = 0…185.
+- Structure of the 30.25 s track: intro arpeggio (bars 0–6) → gated stutter **break** (bar 7) → 808 **drop** (bar 8) → to the end, where the clip cuts out on the bar-14 downbeat.
+- **Edit:** the whole track from its first downbeat (source 0.021 s), then 0.6 s of silence under the end card.
+- Timeline unit: one 16th note, `n`. `v = n × 0.135135 s`, frame = `n × 4.054`. The music spans n = 0…224.
 - Drop pattern per bar (16th offsets): **0, 3, 4, 6, 8, 10, 12** (808 + clap). Cuts and punches land on these.
 
-| bar | n | time (s) | music |
-|---|---|---|---|
-| 2 (tail) | 0 | 0.000 | intro arp, fading in |
-| 3 | 9 | 1.216 | downbeat |
-| 4 | 25 | 3.378 | phrase start (silence 3.31–3.38) |
-| 5 | 41 | 5.541 | |
-| 6 | 57 | 7.703 | phrase start (silence 7.60–7.72) |
-| 7 | 73 | 9.865 | **break**: gated 16th stutter |
-| 8 | 89 | 12.027 | **DROP** |
-| 9 | 105 | 14.189 | |
-| 10 | 121 | 16.351 | (silence 16.29–16.37) |
-| 11 | 137 | 18.514 | stutter at the end of the bar |
-| 12 | 153 | 20.676 | |
-| 13 | 169 | 22.838 | last bar (silence 22.78–22.85) |
-| end | 185 | 25.000 | track cuts out |
+| bar | n | time (s) | music | picture |
+|---|---|---|---|---|
+| 0 | 0 | 0.00 | intro arp | CRT on, title types in |
+| 1 | 16 | 2.16 | | title holds |
+| 2 | 32 | 4.32 | phrase (silence 4.26–4.32) | blink → **eye snaps open**, title blasts away |
+| 3 | 48 | 6.49 | | dive, pupil, tunnel |
+| 4 | 64 | 8.65 | phrase (silence 8.56–8.65) | the portfolio: covers, carousels |
+| 5 | 80 | 10.81 | | carousels, Lexus full-frame, Meliá |
+| 6 | 96 | 12.97 | phrase (silence 12.85–12.97) | monitor wall → "about" click |
+| 7 | 112 | 15.14 | **break**: gated stutter | about panel → 14 logos |
+| 8 | 128 | 17.30 | **DROP** | Malik Cross |
+| 9 | 144 | 19.46 | | Kill the Boy, WPP |
+| 10 | 160 | 21.62 | (silence 21.54–21.62) | UNCOMMONSENSE |
+| 11 | 176 | 23.78 | stutter at the end | Lexus, El Águila, Meliá |
+| 12 | 192 | 25.95 | | AI FILMMAKER / CREATIVE TECHNOLOGIST / ART DIRECTOR |
+| 13 | 208 | 28.11 | last bar (silence 28.03–28.11) | exit the pupil, name, eye shuts, end card |
+| end | 224 | 30.27 | track cuts out | NEW PORTFOLIO ● LIVE holds 0.6 s, CRT off |
 
 ## Scenes
 
-### S1 · The eye opens (n 0–25 · 0.00–3.38 s)
-- **n 0–9:** black. CRT power-on flicker. Source: the site's hero `anime-eye` video. The eyelid is drawn almost shut by a per-column lid warp (the real lash line slides down over the eye). Two small lid flutters on the beats (n 1, n 5). Tiny HUD types in: `NICOLO-LOMBARDI.COM`, a red REC dot, a running timecode.
-- **n 9 (bar 3 downbeat):** **SNAP.** The lids fly open past their rest position, so the eye goes *wide* (stretched aperture, slight bloat). 1-frame flash, 30 px RGB split, slice glitch.
-- **n 9–24.5:** the camera dives into the black pupil. Zoom 1× to 22× on an exponential ease, the centre drifting from the eye to the pupil, radial zoom blur growing with speed, and the halftone dots blowing up into a pixel grid. A thin reticle (PUPIL LOCK) locks onto the pupil. Inside the pupil, the site's black/white/red pixel squares stream out at us like a hyperspace tunnel.
-- **n 24.5–25 (silence):** pure black. We are inside the eye.
+### S1 · Title, then into the eye (n 0–64 · 0.00–8.65 s)
+- **n 0–2:** CRT power-on: a line opens into the site's hero `anime-eye`, drawn with heavy lids by a per-column lid warp (the real lash line slides down over the eye).
+- **n 2–32:** **NICOLÓ LOMBARDI** rises in letter by letter exactly like the home page (0.9em rise, the site's `cubic-bezier(0.16,1,0.3,1)`, 55 ms stagger), then *AI Production Specialist*. The site's typography is Arial bold, -0.04em, ×1.08 wide, set larger for video. It holds readable for about 3 s, with a red echo, chromatic pulses on the beats and lid flutters.
+- **n 31.5–32 (silence):** the eye blinks shut.
+- **n 32 (bar 2):** **SNAP.** A negative frame, and the lids fly open past rest, so the eye goes *wide*. The title blasts toward the camera and dissolves.
+- **n 32–63.5:** the dive. Zoom 1× to 22× toward the pupil, with a reticle (PUPIL LOCK) and beat pulses. The halftone dots blow up into a pixel grid. Inside the pupil, the site's pixel squares rush out like a hyperspace tunnel, carrying small framed screens of the work (Malik Cross, Kill the Boy, WPP, UNCOMMONSENSE, Lexus, El Águila, Meliá).
+- **n 63.5–64 (silence):** black.
 
-### S2 · Inside: the site boots (n 25–57 · 3.38–7.70 s)
-- **n 25–33:** live **home page** capture: the eye hero video with the NICOLÓ LOMBARDI letter-reveal animation and "AI Production Specialist". It starts at 1.6× and pulls back to 1.0×: we come out of the eye *into* the eye.
-- **n 33–41:** **snap-scroll** down the home page: UNCOMMONSENSE, Malik Cross (BIONIC AWARDS), Toyota, Lexus, one snap per 8th note. The site's next-project logo cursor rides on the right. Motion smear on each snap.
-- **n 41–57:** **project pages with their videos playing** (live captures): UNCOMMONSENSE carousel sliding, then El Águila carousel, then Kill the Boy carousel, then Meliá. A hard cut per beat, with glitch on the 8ths. Black flash in the silence before bar 6.
+### S2 · Inside: the portfolio (n 64–96 · 8.65–12.97 s)
+- **n 64–72:** `/film/` snap-scroll from the first cover (no eye): UNCOMMONSENSE → Malik Cross (BIONIC AWARDS) → Toyota → Lexus on the 8ths, with the site's next-project logo cursor.
+- **n 72–84:** project pages with videos playing: UNCOMMONSENSE, El Águila and Kill the Boy carousels (each slides on an 8th).
+- **n 84–88:** Lexus **full-frame**: ES grille, then the RZ.
+- **n 88–95:** Meliá carousel, then the UNCOMMONSENSE carousel further along. Black in the silence before bar 6.
 
-### S3 · Monitor wall (n 57–73 · 7.70–9.87 s)
-- **n 57:** 2×2 "CCTV wall" of four live site pages playing at once (Malik Cross page, UNCOMMONSENSE carousel, Kill the Boy carousel, the home page), each tile labelled (CAM_01…04). Tiles power on one by one; a tile glitches or inverts on the 8ths.
-- **n 64–66.5:** push into the home-page tile until it fills the frame.
-- **n 69:** the cursor clicks **about**. The site's real **pixel-curtain** transition covers the screen.
+### S3 · Monitor wall (n 96–112 · 12.97–15.14 s)
+- **n 96:** 2×2 "CCTV wall": Malik Cross page, UNCOMMONSENSE carousel, Kill the Boy carousel, El Águila carousel (CAM_01…04). The tiles power on one by one and glitch on the 8ths.
+- **n 103–105.5:** push into the El Águila tile until it fills the frame.
+- **n 108:** the cursor clicks **about**, and the site's real **pixel-curtain** transition covers the screen.
 
-### S4 · Break: client logos (n 73–89 · 9.87–12.03 s)
-- **n 73–75:** the about panel's "Selected clients" strip (live capture), a fast push-in.
-- **n 75–88:** **all 14 client logos, one per 16th note**, slammed full-frame in white on black with jitter, RGB split and slice shifts. They strobe with the gated stutter (the screen darkens or inverts during each audio gap). Order as on the site: Coca-Cola, Heineken, Lexus, Toyota, Boots, Soap & Glory, Meliá, El Águila, Osborne, Anaya, WPP Production, Wichita, Graphomedia, UNCOMMONSENSE.
-- **n 88.6–89:** white-out into the drop.
+### S4 · Break: client logos (n 112–128 · 15.14–17.30 s)
+- **n 112–114:** the about panel's "Selected clients" strip (live capture), a fast push-in.
+- **n 114–127:** **all 14 client logos, one per 16th note**, white on black with jitter, RGB split and slice shifts, strobing with the gated stutter. Order as on the site: Coca-Cola, Heineken, Lexus, Toyota, Boots, Soap & Glory, Meliá, El Águila, Osborne, Anaya, WPP Production, Wichita, Graphomedia, UNCOMMONSENSE.
+- **n 127.5–128:** white-out into the drop.
 
-### S5 · Drop: the work (n 89–153 · 12.03–20.68 s)
-Hard cuts on the 808 pattern (0, 3, 4, 6, 8, 10, 12). Every hit gets a zoom punch, a flash and an RGB split, decaying over about 5 frames. Small HUD label per project (brand + type, from the site).
-- **Bar 8 (Malik Cross, B&W boxing):** sweat-spray head snap, the punch, the X-ray arm, the scream, the Malik Cross *site page* playing, red gloves, the thermal hood.
-- **Bar 9 (Kill the Boy VFX + WPP Virtual Production):** owl eye (eye rhyme), burning building, the KTB *site carousel*, LED-volume set, neon rain, confetti ring. Black in the silence before bar 10.
-- **Bar 10 (UNCOMMONSENSE):** the *site carousel* with videos playing, then a vertical triptych: claw machine, crematorium fire, photo-booth man, anime girl wide-eyed (eye rhyme), balaclava eyes, frozen fridge.
-- **Bar 11 (Lexus / El Águila / Meliá):** Lexus *site page*, orange SUV on the road, El Águila *site carousel*, the Meliá glitch face, the Seville skyline, the highway, then a stutter strobe into bar 12.
+### S5 · Drop: the work (n 128–192 · 17.30–25.95 s)
+Hard cuts on the 808 pattern. Every hit gets a zoom punch, a bloom and an RGB split decaying over about 5 frames. Small HUD label per project (brand + type, from the site).
+- **Bar 8 (Malik Cross, B&W boxing):** sweat-spray head snap, the punch, the X-ray, the scream, the Malik Cross *site page*, red gloves (red-key), the thermal hood, the walk-out.
+- **Bar 9 (Kill the Boy VFX + WPP Virtual Production):** owl eye (eye rhyme), burning building, the KTB *site carousel*, LED-volume set, neon rain, confetti ring.
+- **Bar 10 (UNCOMMONSENSE):** the *site carousel*, then a vertical triptych: claw machine, crematorium fire, photo-booth man, anime girl wide-eyed, balaclava eyes, frozen fridge, then the logo in ice.
+- **Bar 11 (Lexus / El Águila / Meliá):** Lexus RX grille and the SUV on the road, **full-frame**. Then the El Águila *site carousel*, a Meliá / El Águila triptych, the highway, the Meliá carousel, and a stutter strobe into bar 12.
 
-### S6 · Overdrive and close (n 153–185 · 20.68–25.00 s)
-- **Bar 12:** a 16th-note flash montage of the best frames, interleaved with huge site-style type: AI FILMMAKER, CREATIVE TECHNOLOGIST, ART DIRECTOR (from the site bio). Pixel-curtain squares invade the frame. Black in the silence before bar 13.
-- **Bar 13:** we exit through the pupil (reverse zoom out of the eye). NICOLÓ LOMBARDI locks up over the eye in the site's typography, with AI PRODUCTION SPECIALIST and NICOLO-LOMBARDI.COM. Glitch punches land on the 808s. **n 181 (last hit): the eye slams shut.** Black, with the URL flickering on the last hats. Ends at 25.000 s on the track's cut.
+### S6 · Overdrive and close (n 192–end · 25.95–30.87 s)
+- **Bar 12:** 16th-note flash montage under huge site-style type: AI FILMMAKER, CREATIVE TECHNOLOGIST, ART DIRECTOR. The pixel curtain swallows the frame.
+- **Bar 13:** exit through the pupil. NICOLÓ LOMBARDI and AI PRODUCTION SPECIALIST lock up over the eye. **n 216: the eye slams shut** (negative frame, tears).
+- **n 216.5–end:** **NEW PORTFOLIO ● LIVE** with NICOLO-LOMBARDI.COM. It glitches on the last 808s and hats; when the track cuts out it holds clean for 0.6 s with the red dot still blinking, then a CRT power-off.
 
 ## Self-check plan
-1. Render one still per scene and check eye geometry, lid warp, type legibility and safe margins.
-2. Before the full render, render one frame per beat (46 stills) and check against this board.
-3. Full render. Sample one frame every 45 and review. Verify A/V sync on the drop (frame 361) and the eye-close (n 181, frame 734).
-4. Scan every frame for Soap & Glory imagery, which should appear only in the logo slot (n 80).
+1. One still per beat (59 stills) against this board.
+2. Full render. Sample one frame every 45, plus filmstrips across the title → snap and tunnel → portfolio transitions.
+3. Verify A/V sync on the drop (frame 519) and the music's end (frame 908).
+4. Soap & Glory appears only as a logo (logo slot n 119; About strip n 112–114).

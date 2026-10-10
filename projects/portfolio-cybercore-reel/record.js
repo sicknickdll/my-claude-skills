@@ -143,6 +143,34 @@ const TAKES = {
     videos: (t) => [{ sel: "video", time: 27.5 + t }],
     mouse: () => [960, 1060],
   },
+  // /film/ starts on the first cover, so the scroll never shows the eye hero
+  film_scroll: {
+    url: "/film/",
+    seconds: 2.4,
+    mouse: () => [1690, 560],
+    scroll: (t, H) =>
+      scheduled(
+        [2, 4, 6, 8, 10, 12, 14].map((k, i) => [s16(k), s16(1.2), i * H, (i + 1) * H]),
+        t,
+        0,
+      ),
+  },
+  // "about" clicked from a project page (El Aguila carousel), click at t = 1.4 s
+  about_click2: {
+    url: "/work/elaguila/",
+    seconds: 3.6,
+    videos: (t) =>
+      [5.0, 9.0, 2.0, 7.0].map((o, i) => ({ sel: `.video-slide[data-slide="${i}"] video`, time: o + t })),
+    track: { slides: [1, 2], every: 6, dur: 2.2 },
+    mouse: (t) => {
+      const k = ease(Math.min(1, Math.max(0, (t - 0.95) / 0.43)));
+      return [980 + (1885 - 980) * k, 760 + (27 - 760) * k];
+    },
+    clickAt: 1.4,
+    clickSel: "#about-toggle",
+    fakeCursor: true,
+    aboutScroll: (t) => scheduled([[1.85, 0.01, 0, 99999]], t, 0),
+  },
   about_click: {
     url: "/",
     seconds: 3.0,
