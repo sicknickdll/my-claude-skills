@@ -1,0 +1,523 @@
+{
+  "run": "20261011-135435",
+  "recheck": false,
+  "pile_size": 120,
+  "seed": 45245,
+  "headline": "6 of 7 reviewers that reached a decision rejected",
+  "ats_line": "ATS: most real applicant tracking systems rank and filter for a recruiter rather than auto-reject, so read the ATS reviewer as \"would this surface\". No score is given because none would be real.",
+  "decisions": [
+    {
+      "agent": "ats",
+      "name": "ATS screener",
+      "stage": 1,
+      "status": "ok",
+      "verdict": "ADVANCE",
+      "confidence": 3,
+      "native": "PASS"
+    },
+    {
+      "agent": "hr",
+      "name": "HR recruiter",
+      "stage": 1,
+      "status": "ok",
+      "verdict": "REJECT",
+      "confidence": 4,
+      "native": null
+    },
+    {
+      "agent": "hm",
+      "name": "Hiring manager",
+      "stage": 2,
+      "status": "ok",
+      "verdict": "REJECT",
+      "confidence": 4,
+      "native": "interview NO"
+    },
+    {
+      "agent": "lead",
+      "name": "Team lead",
+      "stage": 3,
+      "status": "ok",
+      "verdict": "REJECT",
+      "confidence": 4,
+      "native": null
+    },
+    {
+      "agent": "peer",
+      "name": "Senior peer",
+      "stage": 3,
+      "status": "ok",
+      "verdict": "REJECT",
+      "confidence": 4,
+      "native": null
+    },
+    {
+      "agent": "applicant",
+      "name": "Rival applicant",
+      "stage": 3,
+      "status": "ok",
+      "verdict": "REJECT",
+      "confidence": 4,
+      "native": null
+    },
+    {
+      "agent": "ceo",
+      "name": "CEO",
+      "stage": 4,
+      "status": "ok",
+      "verdict": "REJECT",
+      "confidence": 4,
+      "native": null
+    }
+  ],
+  "issues": [
+    {
+      "id": "I1",
+      "raised_by": [
+        "ats",
+        "hr",
+        "hm",
+        "lead",
+        "peer",
+        "applicant",
+        "ceo"
+      ],
+      "n_reviewers": 7,
+      "max_severity": 3,
+      "sum_severity": 21,
+      "sum_confidence": 27,
+      "first_stage": 1,
+      "category": "impact",
+      "scope": "line",
+      "quote": "Improved the performance of the main web app",
+      "problem": "The experience bullets state duties with no result, metric, scale or technology. 'Improved the performance' tells a recruiter nothing, and 'Responsible for the frontend of several client projects' and 'Helped the juniors' are just as thin. Against 120 applications, nothing here separates this candidate from the rest, and it is the main reason a recruiter would pass.",
+      "fix": "Rewrite each bullet as action, tech and measured result, for example 'Cut Largest Contentful Paint from X s to Y s on the main React/TypeScript web app by code-splitting and image optimisation'. Add the number of client projects, the users or traffic served, the size of the design system and how many developers use it, and how many juniors were mentored.",
+      "members": [
+        {
+          "agent": "ats",
+          "quote": "Improved the performance of the main web app",
+          "problem": "The experience bullets state duties with no result, metric, scale or technology. 'Improved the performance' tells a recruiter nothing, and 'Responsible for the frontend of several client projects' and 'Helped the juniors' are just as thin. Against 120 applications, nothing here separates this candidate from the rest, and it is the main reason a recruiter would pass.",
+          "fix": "Rewrite each bullet as action, tech and measured result, for example 'Cut Largest Contentful Paint from X s to Y s on the main React/TypeScript web app by code-splitting and image optimisation'. Add the number of client projects, the users or traffic served, the size of the design system and how many developers use it, and how many juniors were mentored.",
+          "severity": 3,
+          "category": "impact",
+          "scope": "line"
+        },
+        {
+          "agent": "hr",
+          "quote": "Improved the performance of the main web app",
+          "problem": "Every bullet in the current role is a task description with no result, stack or scale. 'Several client projects', 'main web app' and 'helped the juniors' tell a recruiter nothing, and a frontend performance claim without a number reads as filler. Against 120 applications, others will show a metric. A 2021-now role is the only real evidence of seniority, and it shows none.",
+          "fix": "Rewrite each bullet as action + tech + measurable outcome, e.g. 'Cut Largest Contentful Paint on the main web app from X s to Y s via code-splitting and image optimisation (Lighthouse Z to W)'. Name the number of client projects, the team size, the design-system component count and adoption, and how many juniors you mentored.",
+          "severity": 3,
+          "category": "impact",
+          "scope": "section"
+        },
+        {
+          "agent": "hm",
+          "quote": "Improved the performance of the main web app",
+          "problem": "Five years of experience is described only as duties, with no outcome anywhere. 'Improved performance' gives no metric, no method and no sense of scale. 'Responsible for the frontend of several client projects' gives no number of projects, team size or stack. I can't tell whether this person owned the work or just contributed to it, and in a pile of 120 the candidates with measured results get the interviews.",
+          "fix": "Rewrite each bullet as action, method and result, for example 'Cut Largest Contentful Paint on the main web app from 4.1s to 2.2s by code-splitting and image optimisation'. State the number of client projects, the team size and the stack for each. Drop 'Helped the juniors' or give it numbers (how many juniors, what changed).",
+          "severity": 3,
+          "category": "impact",
+          "scope": "section"
+        },
+        {
+          "agent": "lead",
+          "quote": "Improved the performance of the main web app",
+          "problem": "No metric, no method, no outcome. I can't tell whether this was a Lighthouse tweak or a real bundle-splitting and rendering overhaul. In a pile of 120 frontend CVs, a claim with no number is treated as filler. It is also the only bullet that suggests the candidate delivers measurable results.",
+          "fix": "State what you measured, what you changed and the result, for example 'Cut LCP from 4.1s to 1.9s on the main app by code-splitting routes and lazy-loading images (React, Webpack)'. Do the same for the other bullets, adding a user, traffic or team-size number wherever you can.",
+          "severity": 3,
+          "category": "impact",
+          "scope": "line"
+        },
+        {
+          "agent": "peer",
+          "quote": "Improved the performance of the main web app",
+          "problem": "Five years of experience reduced to four vague bullets with no stack, no metric and no scope. I can't tell what was slow, what was changed (bundle splitting, memoisation, image handling, caching) or what the result was. 'Responsible for the frontend of several client projects' says nothing about size, team or difficulty. 'Helped the juniors' is filler. Against a pile of CVs that quote Lighthouse scores, load times and conversion changes, this reads as someone who can't show what they did.",
+          "fix": "Rewrite each bullet as action, tool and result, e.g. 'Cut LCP on the main web app from 4.1s to 1.9s by code-splitting routes and lazy-loading images (React, Vite)'. Name the client types, team size, your part in the design system (components built, adoption, Storybook, a11y) and how you mentored the juniors (code reviews, pairing). If you don't have exact numbers, give honest approximate ones.",
+          "severity": 3,
+          "category": "impact",
+          "scope": "section"
+        },
+        {
+          "agent": "applicant",
+          "quote": "Improved the performance of the main web app",
+          "problem": "Every bullet under Brightwave Digital is a vague duty with no number, stack, scale or outcome. 'Improved performance' doesn't say what was slow, what changed or by how much. The strong resumes in this pile say things like 'cut LCP from 4.1s to 1.8s' or 'reduced bundle size by 40%'. After 5 years in the role this reads as junior-level ownership.",
+          "fix": "Rewrite each Brightwave bullet as action + tech + measurable result. For example: 'Cut main web app LCP from X to Y by code-splitting and image optimisation (React, Vite), lifting Lighthouse score from A to B'. Do the same for the design system (number of components, teams, projects using it) and for the client projects (how many, what stack, what scale).",
+          "severity": 3,
+          "category": "impact",
+          "scope": "section"
+        },
+        {
+          "agent": "ceo",
+          "quote": "Improved the performance of the main web app",
+          "problem": "Five years of experience and not one number or outcome. I can't tell what was slow, what was done, or what changed for users or the business. 'Responsible for', 'worked on' and 'helped the juniors' describe duties, not results. Most of the 120 applications will be equally vague, and the ~10% that advance will show measurable impact.",
+          "fix": "Rewrite each Brightwave bullet as action plus measurable result, e.g. 'Cut Largest Contentful Paint from 4.1s to 1.8s on the main web app by code-splitting and image optimisation, lifting checkout conversion X%'. Name the clients or product types, the team size, the design system's adoption (components, teams, hours saved) and how many juniors you mentored.",
+          "severity": 3,
+          "category": "impact",
+          "scope": "section"
+        }
+      ],
+      "score": 21
+    },
+    {
+      "id": "I2",
+      "raised_by": [
+        "ats",
+        "hr",
+        "hm",
+        "lead",
+        "peer",
+        "applicant",
+        "ceo"
+      ],
+      "n_reviewers": 7,
+      "max_severity": 2,
+      "sum_severity": 14,
+      "sum_confidence": 27,
+      "first_stage": 1,
+      "category": "region",
+      "scope": "line",
+      "quote": "Date of birth: {{PII_DOB}}",
+      "problem": "A date of birth on a Belgian CV breaks the regional convention and brings no benefit. It exposes the candidate to age bias and is clutter for the recruiter.",
+      "fix": "Delete the date of birth. Keep only name, city, phone, email and LinkedIn, and add a GitHub or portfolio link, which matters more for frontend roles.",
+      "members": [
+        {
+          "agent": "ats",
+          "quote": "Date of birth: {{PII_DOB}}",
+          "problem": "A date of birth on a Belgian CV breaks the regional convention and brings no benefit. It exposes the candidate to age bias and is clutter for the recruiter.",
+          "fix": "Delete the date of birth. Keep only name, city, phone, email and LinkedIn, and add a GitHub or portfolio link, which matters more for frontend roles.",
+          "severity": 2,
+          "category": "region",
+          "scope": "line"
+        },
+        {
+          "agent": "hr",
+          "quote": "Date of birth: {{PII_DOB}}",
+          "problem": "A date of birth on a Belgian CV breaks the local convention and invites age bias. It sits in the header, so a skim catches it immediately and reads it as someone unaware of norms. The 'About me 🚀' emoji heading adds to that impression.",
+          "fix": "Delete the date of birth. Keep only name, city, phone, email and LinkedIn (plus GitHub or portfolio, which a frontend dev should show). Drop the emoji from the heading and use a plain 'Profile' heading.",
+          "severity": 2,
+          "category": "region",
+          "scope": "line"
+        },
+        {
+          "agent": "hm",
+          "quote": "Date of birth: {{PII_DOB}}",
+          "problem": "A date of birth on a Belgian CV breaks the local convention and signals the candidate doesn't know it. The same goes for language levels given as 'native · very good · basic' instead of CEFR (A1-C2), and for the emoji in the 'About me' heading. Each is small, but together they make the CV look careless in a pile where most applicants get these details right.",
+          "fix": "Delete the date of birth. Give languages as 'Dutch: C2 · English: C1 · French: A2'. Remove the emoji and replace the generic 'Hardworking and passionate' summary with one line stating years of experience, stack and strongest result.",
+          "severity": 2,
+          "category": "region",
+          "scope": "line"
+        },
+        {
+          "agent": "lead",
+          "quote": "Date of birth: {{PII_DOB}}",
+          "problem": "Belgian CV convention is no date of birth or age, and it invites bias. The language line also doesn't use CEFR levels, so 'native', 'very good' and 'basic' can't be compared with the A1-C2 scale Belgian employers expect. The other presentation choices (an emoji in the 'About me' heading, dot-rating bars for skills) look unpolished and the bars are self-assessed numbers nobody can verify.",
+          "fix": "Remove the date of birth. Write 'Dutch: C2 · English: C1 · French: A2' (use your real levels). Drop the emoji and replace the dot bars with a plain skills list grouped by use (React, TypeScript, CSS/Sass, Node.js), noting years of use or the project where you used each.",
+          "severity": 2,
+          "category": "region",
+          "scope": "line"
+        },
+        {
+          "agent": "peer",
+          "quote": "Date of birth: {{PII_DOB}}",
+          "problem": "A date of birth breaks Belgian CV convention and gives the reader nothing job-relevant. Together with the language line ('Dutch: native · English: very good · French: basic'), which has no CEFR levels, it shows the CV wasn't adapted to the Belgian market, where employers expect Dutch, French and English on the A1-C2 scale.",
+          "fix": "Remove the date of birth. Change the languages line to CEFR levels, e.g. 'Dutch: C2 · English: C1 · French: A2'. Keep to one A4 page.",
+          "severity": 2,
+          "category": "region",
+          "scope": "line"
+        },
+        {
+          "agent": "applicant",
+          "quote": "Date of birth: {{PII_DOB}}",
+          "problem": "A Belgian CV should not include a date of birth, which invites age bias and is not expected. Language skills also don't use the CEFR scale ('Dutch: native · English: very good · French: basic'), which Belgian employers expect. The dot ratings in the skills table are self-assessed and unverifiable. Taken together, these show the candidate doesn't know local CV conventions, which costs ground against polished applicants.",
+          "fix": "Delete the date of birth. Restate languages as 'Dutch: C2 · English: C1 · French: A2' (or the real levels). Replace the dot-rated skills table with a plain list of technologies grouped by area, for example 'React, TypeScript, Sass, Node.js', with years of use where helpful.",
+          "severity": 2,
+          "category": "region",
+          "scope": "line"
+        },
+        {
+          "agent": "ceo",
+          "quote": "Date of birth: {{PII_DOB}}",
+          "problem": "Date of birth on a Belgian CV breaks the convention and invites bias. The language line also uses 'native', 'very good' and 'basic' instead of CEFR levels, which Belgian employers expect to see for Dutch, French and English. Together these make the CV look unprepared for this market.",
+          "fix": "Remove the date of birth. Write 'Dutch: C2 · English: C1 · French: A2' with your real levels. Keep the CV to one A4 page and drop the hobbies and 'References available on request' to make room for results.",
+          "severity": 2,
+          "category": "region",
+          "scope": "line"
+        }
+      ],
+      "score": 14
+    },
+    {
+      "id": "I3",
+      "raised_by": [
+        "applicant",
+        "ceo"
+      ],
+      "n_reviewers": 2,
+      "max_severity": 2,
+      "sum_severity": 4,
+      "sum_confidence": 8,
+      "first_stage": 3,
+      "category": "clarity",
+      "scope": "section",
+      "quote": "Hardworking and passionate frontend developer and team player with a passion for clean code and great user experiences. Looking for a new challenge where I can grow!",
+      "problem": "A generic summary of clichés ('hardworking', 'passionate' twice, 'team player') that every applicant uses. It says nothing about years of experience, specialisation or what the candidate offers the employer. 'Where I can grow' puts the candidate's needs first, and the emoji in the heading is out of place on a Belgian CV.",
+      "fix": "Replace it with 2 concrete lines: years of experience, core stack, and one proof point. For example: 'Frontend developer with 5 years of React/TypeScript experience, building a design system and improving the performance of a production web app at an agency in Gent.' Remove the emoji.",
+      "members": [
+        {
+          "agent": "applicant",
+          "quote": "Hardworking and passionate frontend developer and team player with a passion for clean code and great user experiences. Looking for a new challenge where I can grow!",
+          "problem": "A generic summary of clichés ('hardworking', 'passionate' twice, 'team player') that every applicant uses. It says nothing about years of experience, specialisation or what the candidate offers the employer. 'Where I can grow' puts the candidate's needs first, and the emoji in the heading is out of place on a Belgian CV.",
+          "fix": "Replace it with 2 concrete lines: years of experience, core stack, and one proof point. For example: 'Frontend developer with 5 years of React/TypeScript experience, building a design system and improving the performance of a production web app at an agency in Gent.' Remove the emoji.",
+          "severity": 2,
+          "category": "clarity",
+          "scope": "section"
+        },
+        {
+          "agent": "ceo",
+          "quote": "Hardworking and passionate frontend developer and team player with a passion for clean code and great user experiences.",
+          "problem": "Generic filler that every applicant writes. It says nothing about seniority, domain, scale or what I would get by hiring this person. The rocket emoji in the heading and 'Looking for a new challenge where I can grow!' read as junior and make me skim past the whole top of the page.",
+          "fix": "Replace it with a 2-line factual summary: years of experience, stack (React, TypeScript, design systems), the kind of products built, and your strongest result. Delete the emoji and the 'grow' line.",
+          "severity": 2,
+          "category": "clarity",
+          "scope": "section"
+        }
+      ],
+      "score": 4
+    },
+    {
+      "id": "I4",
+      "raised_by": [
+        "hr",
+        "ats"
+      ],
+      "n_reviewers": 2,
+      "max_severity": 2,
+      "sum_severity": 3,
+      "sum_confidence": 7,
+      "first_stage": 1,
+      "category": "language",
+      "scope": "line",
+      "quote": "Dutch: native · English: very good · French: basic",
+      "problem": "Language levels are not on the CEFR scale. 'Very good' and 'basic' can't be compared against a posting's requirement, and for a Ghent employer French level often decides the shortlist. The dot ratings in the skills table (e.g. Node.js ●●○○○) have the same problem: they are subjective and show a weak spot without context.",
+      "fix": "Use CEFR levels, e.g. 'Dutch: C2 (native) · English: C1 · French: A2'. Replace the dot table with a plain-text skills line grouped by type (React, TypeScript, CSS/Sass, Node.js, plus the tools you really use, such as Git, testing, accessibility, CI) so a parser and a skimmer both read it.",
+      "members": [
+        {
+          "agent": "hr",
+          "quote": "Dutch: native · English: very good · French: basic",
+          "problem": "Language levels are not on the CEFR scale. 'Very good' and 'basic' can't be compared against a posting's requirement, and for a Ghent employer French level often decides the shortlist. The dot ratings in the skills table (e.g. Node.js ●●○○○) have the same problem: they are subjective and show a weak spot without context.",
+          "fix": "Use CEFR levels, e.g. 'Dutch: C2 (native) · English: C1 · French: A2'. Replace the dot table with a plain-text skills line grouped by type (React, TypeScript, CSS/Sass, Node.js, plus the tools you really use, such as Git, testing, accessibility, CI) so a parser and a skimmer both read it.",
+          "severity": 2,
+          "category": "language",
+          "scope": "line"
+        },
+        {
+          "agent": "ats",
+          "quote": "Dutch: native · English: very good · French: basic",
+          "problem": "Belgian employers expect CEFR levels. 'very good' and 'basic' are not comparable levels, and French is often a screening criterion in Belgium.",
+          "fix": "Write 'Dutch: native · English: C1 · French: A2' (or the real levels), and add a CV-based or certificate-based level if you have one.",
+          "severity": 1,
+          "category": "language",
+          "scope": "line"
+        }
+      ],
+      "score": 4
+    },
+    {
+      "id": "I5",
+      "raised_by": [
+        "lead"
+      ],
+      "n_reviewers": 1,
+      "max_severity": 3,
+      "sum_severity": 3,
+      "sum_confidence": 4,
+      "first_stage": 3,
+      "category": "relevance",
+      "scope": "section",
+      "quote": "Responsible for the frontend of several client projects",
+      "problem": "This describes a duty, not what was done. It doesn't say how many projects, which stack, whether the candidate owned them alone or in a team, or whether they worked with designers, backend and QA. After about 5 years I can't judge whether this person can ship a feature by day 30 without hand-holding. 'Helped the juniors' and 'Worked on a React design system' are just as vague, and the design system line doesn't say what the candidate contributed.",
+      "fix": "Rewrite as specific deliverables: number and type of projects, tech used (React, TypeScript, testing, CI), your role, and the working setup (team size, code review, working with designers). For the design system, name what you built (components, tokens, Storybook, accessibility), how many components, and who adopted it.",
+      "members": [
+        {
+          "agent": "lead",
+          "quote": "Responsible for the frontend of several client projects",
+          "problem": "This describes a duty, not what was done. It doesn't say how many projects, which stack, whether the candidate owned them alone or in a team, or whether they worked with designers, backend and QA. After about 5 years I can't judge whether this person can ship a feature by day 30 without hand-holding. 'Helped the juniors' and 'Worked on a React design system' are just as vague, and the design system line doesn't say what the candidate contributed.",
+          "fix": "Rewrite as specific deliverables: number and type of projects, tech used (React, TypeScript, testing, CI), your role, and the working setup (team size, code review, working with designers). For the design system, name what you built (components, tokens, Storybook, accessibility), how many components, and who adopted it.",
+          "severity": 3,
+          "category": "relevance",
+          "scope": "section"
+        }
+      ],
+      "score": 3
+    },
+    {
+      "id": "I6",
+      "raised_by": [
+        "peer"
+      ],
+      "n_reviewers": 1,
+      "max_severity": 2,
+      "sum_severity": 2,
+      "sum_confidence": 4,
+      "first_stage": 3,
+      "category": "ats_parse",
+      "scope": "section",
+      "quote": "| TypeScript | ●●●○○ |",
+      "problem": "Self-rated dot scales tell a senior reader nothing and can hurt. A 3/5 for TypeScript on a frontend CV, next to a 5/5 for 'CSS / Sass', suggests this person is still weak in the language most React teams now require. Parsers drop the dot glyphs and the table, so the level information is lost anyway. The list also leaves out testing (Jest, Testing Library, Cypress or Playwright), Git, build tooling, accessibility and any named framework or router. The Vue internship and WordPress freelance work aren't connected to it.",
+      "fix": "Drop the dot ratings and the table. Use a plain grouped list, e.g. 'Languages: TypeScript, JavaScript, HTML, CSS/Sass. Frameworks: React, Vue. Tooling: Vite, Git, Jest/Testing Library, Storybook.' Put each skill inside a bullet where you used it. Be ready to show real TypeScript work, or leave out the weak rating.",
+      "members": [
+        {
+          "agent": "peer",
+          "quote": "| TypeScript | ●●●○○ |",
+          "problem": "Self-rated dot scales tell a senior reader nothing and can hurt. A 3/5 for TypeScript on a frontend CV, next to a 5/5 for 'CSS / Sass', suggests this person is still weak in the language most React teams now require. Parsers drop the dot glyphs and the table, so the level information is lost anyway. The list also leaves out testing (Jest, Testing Library, Cypress or Playwright), Git, build tooling, accessibility and any named framework or router. The Vue internship and WordPress freelance work aren't connected to it.",
+          "fix": "Drop the dot ratings and the table. Use a plain grouped list, e.g. 'Languages: TypeScript, JavaScript, HTML, CSS/Sass. Frameworks: React, Vue. Tooling: Vite, Git, Jest/Testing Library, Storybook.' Put each skill inside a bullet where you used it. Be ready to show real TypeScript work, or leave out the weak rating.",
+          "severity": 2,
+          "category": "ats_parse",
+          "scope": "section"
+        }
+      ],
+      "score": 2
+    },
+    {
+      "id": "I7",
+      "raised_by": [
+        "ats"
+      ],
+      "n_reviewers": 1,
+      "max_severity": 2,
+      "sum_severity": 2,
+      "sum_confidence": 3,
+      "first_stage": 1,
+      "category": "keywords",
+      "scope": "section",
+      "quote": "Skills",
+      "problem": "A typical Frontend Developer posting searches on JavaScript, HTML, Git, testing, accessibility, responsive design, REST APIs and Agile. None of these terms appear anywhere in the resume, so keyword filters will rank it below candidates who list them. Four skills in total is a thin list for a candidate with about 5 years of experience.",
+      "fix": "Add a complete, honest tech list covering JavaScript (ES6+), HTML5, Git, a testing tool if used (Jest, Cypress, Testing Library), accessibility, responsive design, REST/GraphQL APIs, build tools and Agile/Scrum. Also name the stack in the experience bullets, for example the design-system tooling (Storybook, npm package).",
+      "members": [
+        {
+          "agent": "ats",
+          "quote": "Skills",
+          "problem": "A typical Frontend Developer posting searches on JavaScript, HTML, Git, testing, accessibility, responsive design, REST APIs and Agile. None of these terms appear anywhere in the resume, so keyword filters will rank it below candidates who list them. Four skills in total is a thin list for a candidate with about 5 years of experience.",
+          "fix": "Add a complete, honest tech list covering JavaScript (ES6+), HTML5, Git, a testing tool if used (Jest, Cypress, Testing Library), accessibility, responsive design, REST/GraphQL APIs, build tools and Agile/Scrum. Also name the stack in the experience bullets, for example the design-system tooling (Storybook, npm package).",
+          "severity": 2,
+          "category": "keywords",
+          "scope": "section"
+        }
+      ],
+      "score": 2
+    },
+    {
+      "id": "I8",
+      "raised_by": [
+        "ats"
+      ],
+      "n_reviewers": 1,
+      "max_severity": 2,
+      "sum_severity": 2,
+      "sum_confidence": 3,
+      "first_stage": 1,
+      "category": "ats_parse",
+      "scope": "section",
+      "quote": "| React | ●●●●○ |",
+      "problem": "The Skills section is a table with dot rating bars. A parser flattens it into 'React ●●●●○' strings, and the glyphs are noise. The self-ratings also hurt: TypeScript at 3/5 and Node.js at 2/5 invite a recruiter to screen on the weakest rating. The emoji in 'About me 🚀' and the non-standard heading 'Where I've worked' add further parse risk, since some systems look for 'Experience'.",
+      "fix": "Replace the table with a plain-text list grouped by category, with no ratings, for example 'Languages: TypeScript, JavaScript, HTML, CSS/Sass'. Remove the emoji. Rename the headings to 'Profile' and 'Work experience'.",
+      "members": [
+        {
+          "agent": "ats",
+          "quote": "| React | ●●●●○ |",
+          "problem": "The Skills section is a table with dot rating bars. A parser flattens it into 'React ●●●●○' strings, and the glyphs are noise. The self-ratings also hurt: TypeScript at 3/5 and Node.js at 2/5 invite a recruiter to screen on the weakest rating. The emoji in 'About me 🚀' and the non-standard heading 'Where I've worked' add further parse risk, since some systems look for 'Experience'.",
+          "fix": "Replace the table with a plain-text list grouped by category, with no ratings, for example 'Languages: TypeScript, JavaScript, HTML, CSS/Sass'. Remove the emoji. Rename the headings to 'Profile' and 'Work experience'.",
+          "severity": 2,
+          "category": "ats_parse",
+          "scope": "section"
+        }
+      ],
+      "score": 2
+    }
+  ],
+  "strengths": [
+    {
+      "agent": "hm",
+      "quote": "Worked on a React design system used by the whole team",
+      "why": "This is the strongest line on the CV. A shared React design system is the kind of ownership-level frontend work I want at 4+ years, and it matches the React, TypeScript and CSS/Sass skills listed. It is undermined by 'Worked on', which doesn't show what the candidate actually did, and by having no adoption or impact figures."
+    },
+    {
+      "agent": "ceo",
+      "quote": "Worked on a React design system used by the whole team",
+      "why": "It is the one line that shows leverage: shared infrastructure other people depend on, in the stack this role needs. It would stand out if it carried scope and measurable adoption."
+    },
+    {
+      "agent": "lead",
+      "quote": "Worked on a React design system used by the whole team",
+      "why": "It is the one line that points to reusable, shared frontend work and to collaboration, and it fits a React scale-up team. It would carry real weight once it says what the candidate built and how many people or projects used it."
+    },
+    {
+      "agent": "peer",
+      "quote": "Worked on a React design system used by the whole team",
+      "why": "A shared design system is real frontend scope: component API design, reuse and consistency across projects. It is the one line that points to craft beyond building pages. It still needs detail on the stack, what the candidate built and how widely it was adopted."
+    },
+    {
+      "agent": "hr",
+      "quote": "Worked on a React design system used by the whole team",
+      "why": "It is the one bullet that shows real frontend scope, shared ownership and a modern React stack. It is directly relevant to a Frontend Developer posting and gives a recruiter something concrete to ask about, though it needs numbers to carry full weight."
+    },
+    {
+      "agent": "applicant",
+      "quote": "Worked on a React design system used by the whole team",
+      "why": "It shows work beyond building pages: shared component infrastructure that others rely on. That is relevant to mid-level frontend roles. It would be stronger with numbers (how many components, how many projects)."
+    }
+  ],
+  "ats": {
+    "result": "PASS",
+    "knockouts": [
+      {
+        "requirement": "Degree in computer science or a related field (or equivalent experience)",
+        "status": "met",
+        "evidence_quote": "Bachelor in Applied Computer Science (2016 - 2019)"
+      },
+      {
+        "requirement": "2+ years of professional frontend experience",
+        "status": "met",
+        "evidence_quote": "Frontend Developer, Brightwave Digital, Gent (2021 - now)"
+      },
+      {
+        "requirement": "Dutch and English working proficiency (typical Belgian posting)",
+        "status": "met",
+        "evidence_quote": "Dutch: native"
+      }
+    ],
+    "keywords": {
+      "source": "role_typical",
+      "found": [
+        "Frontend",
+        "React",
+        "TypeScript",
+        "CSS",
+        "Sass",
+        "Node.js",
+        "Vue",
+        "design system",
+        "performance",
+        "WordPress",
+        "SEO"
+      ],
+      "missing_required": [
+        "JavaScript",
+        "HTML",
+        "Git"
+      ],
+      "missing_preferred": [
+        "unit testing",
+        "accessibility",
+        "responsive design",
+        "REST APIs",
+        "Agile/Scrum",
+        "CI/CD",
+        "Next.js"
+      ]
+    }
+  },
+  "discards": [],
+  "no_decision": []
+}

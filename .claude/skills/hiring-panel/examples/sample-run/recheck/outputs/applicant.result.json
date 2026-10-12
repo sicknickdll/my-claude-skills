@@ -1,0 +1,86 @@
+{
+  "agent": "applicant",
+  "attempt": 1,
+  "errors": [],
+  "soft_errors": [],
+  "warnings": [],
+  "dropped": [],
+  "final_view": {
+    "status": "ok",
+    "data": {
+      "agent": "applicant",
+      "confidence": 4,
+      "verdict": "REJECT",
+      "issues": [
+        {
+          "problem": "The strongest claim has no before/after number anywhere in the CV, including the profile. Rivals with 4+ years of React will show a concrete LCP, Lighthouse or bundle-size change. A \"main web app\" performance claim with no figure reads as a task description, not a result, so the CV is indistinguishable from the other decent ones in the pile.",
+          "fix": "State the specific change (e.g. route-level code-splitting, image optimisation) and the measured result (e.g. LCP from X s to Y s, Lighthouse from X to Y). Repeat that single number in the profile. Give every bullet at least one number: components shipped, projects delivered, juniors mentored.",
+          "severity": 3,
+          "category": "impact",
+          "scope": "line",
+          "quote": "Improved the performance of the main web app by"
+        },
+        {
+          "problem": "\"Contributed to\" with \"the whole team\" as the audience undersells the scope. It does not show ownership, size or adoption. Strong rivals say they built or led a design system consumed by several teams or products. As written it reads as one developer among many, on an internal library with few users.",
+          "fix": "Say what you owned (tokens, accessible components, Storybook, docs, versioning). Give the component count and the number of developers and projects that consume it. Use a verb that matches your real role: built, led, maintained.",
+          "severity": 2,
+          "category": "relevance",
+          "scope": "line",
+          "quote": "to the React design system used by the whole team"
+        },
+        {
+          "problem": "The skills section does not contain what a Frontend Developer posting screens on: testing (Jest, Testing Library, Cypress or Playwright), accessibility/WCAG, Git, responsive design, REST APIs, CI/CD, and Next.js if used. WordPress, SEO and Vue from the freelance and intern years take up space instead. The seniors you are competing with list these explicitly, so this CV loses keyword matches and signals less depth.",
+          "fix": "Fill this line with only the tools you really use, led by testing, accessibility, Git, responsive design and CI/CD. Move WordPress and SEO to a short secondary line or drop them. Make sure React and TypeScript work shows up in the bullets, not only in the skills list.",
+          "severity": 2,
+          "category": "keywords",
+          "scope": "section",
+          "quote": "Other tools and practices:"
+        }
+      ],
+      "strength": {
+        "quote": "Frontend developer working with React, TypeScript and CSS/Sass, at Brightwave Digital in Gent since 2021.",
+        "why": "It names the role, the core stack that matches a typical Frontend Developer posting, the employer, the city and the tenure in one line, so a screener can place the candidate in seconds."
+      }
+    },
+    "errors": [],
+    "soft_errors": [],
+    "warnings": [],
+    "dropped": []
+  },
+  "status": "ok",
+  "data": {
+    "agent": "applicant",
+    "confidence": 4,
+    "verdict": "REJECT",
+    "issues": [
+      {
+        "problem": "The strongest claim has no before/after number anywhere in the CV, including the profile. Rivals with 4+ years of React will show a concrete LCP, Lighthouse or bundle-size change. A \"main web app\" performance claim with no figure reads as a task description, not a result, so the CV is indistinguishable from the other decent ones in the pile.",
+        "fix": "State the specific change (e.g. route-level code-splitting, image optimisation) and the measured result (e.g. LCP from X s to Y s, Lighthouse from X to Y). Repeat that single number in the profile. Give every bullet at least one number: components shipped, projects delivered, juniors mentored.",
+        "severity": 3,
+        "category": "impact",
+        "scope": "line",
+        "quote": "Improved the performance of the main web app by"
+      },
+      {
+        "problem": "\"Contributed to\" with \"the whole team\" as the audience undersells the scope. It does not show ownership, size or adoption. Strong rivals say they built or led a design system consumed by several teams or products. As written it reads as one developer among many, on an internal library with few users.",
+        "fix": "Say what you owned (tokens, accessible components, Storybook, docs, versioning). Give the component count and the number of developers and projects that consume it. Use a verb that matches your real role: built, led, maintained.",
+        "severity": 2,
+        "category": "relevance",
+        "scope": "line",
+        "quote": "to the React design system used by the whole team"
+      },
+      {
+        "problem": "The skills section does not contain what a Frontend Developer posting screens on: testing (Jest, Testing Library, Cypress or Playwright), accessibility/WCAG, Git, responsive design, REST APIs, CI/CD, and Next.js if used. WordPress, SEO and Vue from the freelance and intern years take up space instead. The seniors you are competing with list these explicitly, so this CV loses keyword matches and signals less depth.",
+        "fix": "Fill this line with only the tools you really use, led by testing, accessibility, Git, responsive design and CI/CD. Move WordPress and SEO to a short secondary line or drop them. Make sure React and TypeScript work shows up in the bullets, not only in the skills list.",
+        "severity": 2,
+        "category": "keywords",
+        "scope": "section",
+        "quote": "Other tools and practices:"
+      }
+    ],
+    "strength": {
+      "quote": "Frontend developer working with React, TypeScript and CSS/Sass, at Brightwave Digital in Gent since 2021.",
+      "why": "It names the role, the core stack that matches a typical Frontend Developer posting, the employer, the city and the tenure in one line, so a screener can place the candidate in seconds."
+    }
+  }
+}

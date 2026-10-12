@@ -1,0 +1,32 @@
+{
+  "format": "md",
+  "words": 351,
+  "pages": 1,
+  "pages_source": "estimated from word count",
+  "multi_column_suspected": false,
+  "tables": 0,
+  "images": 0,
+  "html_tags": 0,
+  "icons_or_emoji": 0,
+  "rating_bars": 0,
+  "headings": [
+    "{{PII_NAME}}",
+    "Profile",
+    "Work experience",
+    "Education",
+    "Skills",
+    "Languages",
+    "Hobbies"
+  ],
+  "standard_sections": [
+    "education",
+    "experience",
+    "interests",
+    "languages",
+    "skills",
+    "summary"
+  ],
+  "nonstandard_headings": [],
+  "injection_phrases": [],
+  "hidden_text": []
+}

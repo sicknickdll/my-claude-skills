@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "tool_version": "1.0.0",
+  "run_id": "20261011-135435/recheck",
+  "created": "2026-10-11T14:00:26",
+  "phase": "aggregated",
+  "is_recheck": true,
+  "mode": "full",
+  "options": {
+    "region": {
+      "value": "be",
+      "source": "inferred",
+      "reason": "Belgian postcode and city"
+    },
+    "lang": {
+      "value": "en",
+      "source": "inferred",
+      "reason": "detected from the resume"
+    },
+    "reviewers": {
+      "value": null,
+      "source": "default",
+      "reason": "roster.json per agent"
+    },
+    "seed": {
+      "value": 45245,
+      "source": "default",
+      "reason": "generated at random"
+    },
+    "mode": {
+      "value": "full",
+      "source": "default",
+      "reason": "a recheck always runs the full panel"
+    },
+    "recheck": {
+      "value": true,
+      "source": "flag"
+    }
+  },
+  "target": {
+    "kind": "inferred",
+    "label": "Frontend Developer",
+    "source": "inferred",
+    "reason": "no --jd or --role given: inferred from the resume"
+  },
+  "resume": {
+    "file": "rewrite/resume.checked.md",
+    "format": "md",
+    "words": 351,
+    "pages": 1
+  },
+  "seed": 45245,
+  "pile_size": 120,
+  "variants": {
+    "applicant_archetype": "an experienced candidate who is slightly overqualified",
+    "company_stage": "a 120-person scale-up",
+    "hr_skim_seconds": 8,
+    "peer_emphasis": "the real scope and difficulty of the work described"
+  },
+  "agents": [
+    "ats",
+    "hm",
+    "ceo",
+    "lead",
+    "peer",
+    "hr",
+    "applicant"
+  ],
+  "attempts": {
+    "ats": 1,
+    "hm": 1,
+    "ceo": 1,
+    "lead": 1,
+    "peer": 1,
+    "hr": 1,
+    "applicant": 1
+  },
+  "rewrite_attempts": 0,
+  "warnings": [],
+  "updated": "2026-10-11T14:02:22"
+}

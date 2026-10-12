@@ -1,0 +1,214 @@
+{
+  "agent": "ats",
+  "attempt": 1,
+  "errors": [],
+  "soft_errors": [],
+  "warnings": [],
+  "dropped": [],
+  "final_view": {
+    "status": "ok",
+    "data": {
+      "agent": "ats",
+      "confidence": 3,
+      "result": "PASS",
+      "knockouts": [
+        {
+          "requirement": "Bachelor's degree in IT or a related field",
+          "status": "met",
+          "evidence_quote": "Bachelor in Applied Computer Science (2016 - 2019)"
+        },
+        {
+          "requirement": "Roughly 2-3+ years of professional frontend experience",
+          "status": "met",
+          "evidence_quote": "Frontend Developer, Brightwave Digital, Gent (2021 - present)"
+        },
+        {
+          "requirement": "Based in or able to work in Belgium (Gent area)",
+          "status": "met",
+          "evidence_quote": "Frontend Developer, Brightwave Digital, Gent (2021 - present)"
+        },
+        {
+          "requirement": "Dutch and English working proficiency, stated on the CEFR scale",
+          "status": "unclear",
+          "evidence_quote": null
+        }
+      ],
+      "keywords": {
+        "source": "role_typical",
+        "found": [
+          "React",
+          "TypeScript",
+          "JavaScript",
+          "HTML",
+          "CSS",
+          "Sass",
+          "Vue",
+          "Node.js",
+          "design systems",
+          "web performance",
+          "code reviews",
+          "SEO"
+        ],
+        "missing_required": [
+          "version control (Git)",
+          "unit testing",
+          "REST API integration",
+          "cross-browser compatibility"
+        ],
+        "missing_preferred": [
+          "web accessibility",
+          "continuous integration",
+          "state management",
+          "end-to-end testing",
+          "Storybook"
+        ]
+      },
+      "issues": [
+        {
+          "problem": "The strongest frontend claim still has no confirmed change or number. Recruiters filter for measurable outcomes (LCP, Lighthouse, bundle size), and the design system and mentoring bullets are equally unquantified. Without them this reads as an average resume in a pile of 120.",
+          "fix": "Fill in the actual technique (code-splitting, image optimisation) and a before/after metric. Add the number of components and the number of developers or projects using the design system.",
+          "severity": 2,
+          "category": "impact",
+          "scope": "section",
+          "quote": "Improved the performance of the main web app by"
+        },
+        {
+          "problem": "Belgian employers expect CEFR levels for Dutch, French and English. \"native\" is not a CEFR level, and the English and French levels are blank. Language is a likely screening filter for this region.",
+          "fix": "Write it as \"Dutch: C2 · English: C1 · French: B2\", using your real levels.",
+          "severity": 2,
+          "category": "region",
+          "scope": "section",
+          "quote": "Dutch: native ([FILL IN: CEFR level])"
+        },
+        {
+          "problem": "The core frontend screening terms are not confirmed anywhere: Git, a test framework, responsive design, REST API integration, accessibility and CI/CD. A keyword filter for a typical Frontend Developer posting would rank this resume below ones that list them.",
+          "fix": "List only the tools you really use. Cover version control, unit and end-to-end testing, accessibility (WCAG), responsive and cross-browser work, REST APIs, CI/CD and Agile. Also use the same terms in the experience bullets.",
+          "severity": 2,
+          "category": "keywords",
+          "scope": "section",
+          "quote": "Other tools and practices: [FILL IN: only what you really use"
+        },
+        {
+          "problem": "A frontend candidate with no visible GitHub or portfolio link gives the recruiter nothing to verify the work against. That weakens the CV compared with candidates who link live projects.",
+          "fix": "Add a GitHub profile or portfolio URL to the header. Make sure it shows the design system or performance work, or comparable projects.",
+          "severity": 2,
+          "category": "contact",
+          "scope": "whole",
+          "quote": "[FILL IN: GitHub or portfolio URL]"
+        },
+        {
+          "problem": "The institution is missing, so the degree cannot be verified or matched by an ATS. The freelance period ends in 2020 and the current job starts in 2021, which leaves an unexplained gap.",
+          "fix": "Add the school name and city. Add a short note or adjust the dates so 2020-2021 is accounted for. Use one date format throughout instead of mixing years and MM/YYYY.",
+          "severity": 1,
+          "category": "gaps",
+          "scope": "section",
+          "quote": "Bachelor in Applied Computer Science (2016 - 2019)"
+        }
+      ]
+    },
+    "errors": [],
+    "soft_errors": [],
+    "warnings": [],
+    "dropped": []
+  },
+  "status": "ok",
+  "data": {
+    "agent": "ats",
+    "confidence": 3,
+    "result": "PASS",
+    "knockouts": [
+      {
+        "requirement": "Bachelor's degree in IT or a related field",
+        "status": "met",
+        "evidence_quote": "Bachelor in Applied Computer Science (2016 - 2019)"
+      },
+      {
+        "requirement": "Roughly 2-3+ years of professional frontend experience",
+        "status": "met",
+        "evidence_quote": "Frontend Developer, Brightwave Digital, Gent (2021 - present)"
+      },
+      {
+        "requirement": "Based in or able to work in Belgium (Gent area)",
+        "status": "met",
+        "evidence_quote": "Frontend Developer, Brightwave Digital, Gent (2021 - present)"
+      },
+      {
+        "requirement": "Dutch and English working proficiency, stated on the CEFR scale",
+        "status": "unclear",
+        "evidence_quote": null
+      }
+    ],
+    "keywords": {
+      "source": "role_typical",
+      "found": [
+        "React",
+        "TypeScript",
+        "JavaScript",
+        "HTML",
+        "CSS",
+        "Sass",
+        "Vue",
+        "Node.js",
+        "design systems",
+        "web performance",
+        "code reviews",
+        "SEO"
+      ],
+      "missing_required": [
+        "version control (Git)",
+        "unit testing",
+        "REST API integration",
+        "cross-browser compatibility"
+      ],
+      "missing_preferred": [
+        "web accessibility",
+        "continuous integration",
+        "state management",
+        "end-to-end testing",
+        "Storybook"
+      ]
+    },
+    "issues": [
+      {
+        "problem": "The strongest frontend claim still has no confirmed change or number. Recruiters filter for measurable outcomes (LCP, Lighthouse, bundle size), and the design system and mentoring bullets are equally unquantified. Without them this reads as an average resume in a pile of 120.",
+        "fix": "Fill in the actual technique (code-splitting, image optimisation) and a before/after metric. Add the number of components and the number of developers or projects using the design system.",
+        "severity": 2,
+        "category": "impact",
+        "scope": "section",
+        "quote": "Improved the performance of the main web app by"
+      },
+      {
+        "problem": "Belgian employers expect CEFR levels for Dutch, French and English. \"native\" is not a CEFR level, and the English and French levels are blank. Language is a likely screening filter for this region.",
+        "fix": "Write it as \"Dutch: C2 · English: C1 · French: B2\", using your real levels.",
+        "severity": 2,
+        "category": "region",
+        "scope": "section",
+        "quote": "Dutch: native ([FILL IN: CEFR level])"
+      },
+      {
+        "problem": "The core frontend screening terms are not confirmed anywhere: Git, a test framework, responsive design, REST API integration, accessibility and CI/CD. A keyword filter for a typical Frontend Developer posting would rank this resume below ones that list them.",
+        "fix": "List only the tools you really use. Cover version control, unit and end-to-end testing, accessibility (WCAG), responsive and cross-browser work, REST APIs, CI/CD and Agile. Also use the same terms in the experience bullets.",
+        "severity": 2,
+        "category": "keywords",
+        "scope": "section",
+        "quote": "Other tools and practices: [FILL IN: only what you really use"
+      },
+      {
+        "problem": "A frontend candidate with no visible GitHub or portfolio link gives the recruiter nothing to verify the work against. That weakens the CV compared with candidates who link live projects.",
+        "fix": "Add a GitHub profile or portfolio URL to the header. Make sure it shows the design system or performance work, or comparable projects.",
+        "severity": 2,
+        "category": "contact",
+        "scope": "whole",
+        "quote": "[FILL IN: GitHub or portfolio URL]"
+      },
+      {
+        "problem": "The institution is missing, so the degree cannot be verified or matched by an ATS. The freelance period ends in 2020 and the current job starts in 2021, which leaves an unexplained gap.",
+        "fix": "Add the school name and city. Add a short note or adjust the dates so 2020-2021 is accounted for. Use one date format throughout instead of mixing years and MM/YYYY.",
+        "severity": 1,
+        "category": "gaps",
+        "scope": "section",
+        "quote": "Bachelor in Applied Computer Science (2016 - 2019)"
+      }
+    ]
+  }
+}

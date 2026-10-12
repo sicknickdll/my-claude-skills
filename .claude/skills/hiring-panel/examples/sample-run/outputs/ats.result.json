@@ -1,0 +1,204 @@
+{
+  "agent": "ats",
+  "attempt": 1,
+  "errors": [],
+  "soft_errors": [],
+  "warnings": [],
+  "dropped": [],
+  "final_view": {
+    "status": "ok",
+    "data": {
+      "agent": "ats",
+      "confidence": 3,
+      "result": "PASS",
+      "knockouts": [
+        {
+          "requirement": "Degree in computer science or a related field (or equivalent experience)",
+          "status": "met",
+          "evidence_quote": "Bachelor in Applied Computer Science (2016 - 2019)"
+        },
+        {
+          "requirement": "2+ years of professional frontend experience",
+          "status": "met",
+          "evidence_quote": "Frontend Developer, Brightwave Digital, Gent (2021 - now)"
+        },
+        {
+          "requirement": "Dutch and English working proficiency (typical Belgian posting)",
+          "status": "met",
+          "evidence_quote": "Dutch: native"
+        }
+      ],
+      "keywords": {
+        "source": "role_typical",
+        "found": [
+          "Frontend",
+          "React",
+          "TypeScript",
+          "CSS",
+          "Sass",
+          "Node.js",
+          "Vue",
+          "design system",
+          "performance",
+          "WordPress",
+          "SEO"
+        ],
+        "missing_required": [
+          "JavaScript",
+          "HTML",
+          "Git"
+        ],
+        "missing_preferred": [
+          "unit testing",
+          "accessibility",
+          "responsive design",
+          "REST APIs",
+          "Agile/Scrum",
+          "CI/CD",
+          "Next.js"
+        ]
+      },
+      "issues": [
+        {
+          "problem": "The experience bullets state duties with no result, metric, scale or technology. 'Improved the performance' tells a recruiter nothing, and 'Responsible for the frontend of several client projects' and 'Helped the juniors' are just as thin. Against 120 applications, nothing here separates this candidate from the rest, and it is the main reason a recruiter would pass.",
+          "fix": "Rewrite each bullet as action, tech and measured result, for example 'Cut Largest Contentful Paint from X s to Y s on the main React/TypeScript web app by code-splitting and image optimisation'. Add the number of client projects, the users or traffic served, the size of the design system and how many developers use it, and how many juniors were mentored.",
+          "severity": 3,
+          "category": "impact",
+          "scope": "line",
+          "quote": "Improved the performance of the main web app"
+        },
+        {
+          "problem": "The Skills section is a table with dot rating bars. A parser flattens it into 'React ●●●●○' strings, and the glyphs are noise. The self-ratings also hurt: TypeScript at 3/5 and Node.js at 2/5 invite a recruiter to screen on the weakest rating. The emoji in 'About me 🚀' and the non-standard heading 'Where I've worked' add further parse risk, since some systems look for 'Experience'.",
+          "fix": "Replace the table with a plain-text list grouped by category, with no ratings, for example 'Languages: TypeScript, JavaScript, HTML, CSS/Sass'. Remove the emoji. Rename the headings to 'Profile' and 'Work experience'.",
+          "severity": 2,
+          "category": "ats_parse",
+          "scope": "section",
+          "quote": "| React | ●●●●○ |"
+        },
+        {
+          "problem": "A typical Frontend Developer posting searches on JavaScript, HTML, Git, testing, accessibility, responsive design, REST APIs and Agile. None of these terms appear anywhere in the resume, so keyword filters will rank it below candidates who list them. Four skills in total is a thin list for a candidate with about 5 years of experience.",
+          "fix": "Add a complete, honest tech list covering JavaScript (ES6+), HTML5, Git, a testing tool if used (Jest, Cypress, Testing Library), accessibility, responsive design, REST/GraphQL APIs, build tools and Agile/Scrum. Also name the stack in the experience bullets, for example the design-system tooling (Storybook, npm package).",
+          "severity": 2,
+          "category": "keywords",
+          "scope": "section",
+          "quote": "Skills"
+        },
+        {
+          "problem": "A date of birth on a Belgian CV breaks the regional convention and brings no benefit. It exposes the candidate to age bias and is clutter for the recruiter.",
+          "fix": "Delete the date of birth. Keep only name, city, phone, email and LinkedIn, and add a GitHub or portfolio link, which matters more for frontend roles.",
+          "severity": 2,
+          "category": "region",
+          "scope": "line",
+          "quote": "Date of birth: {{PII_DOB}}"
+        },
+        {
+          "problem": "Belgian employers expect CEFR levels. 'very good' and 'basic' are not comparable levels, and French is often a screening criterion in Belgium.",
+          "fix": "Write 'Dutch: native · English: C1 · French: A2' (or the real levels), and add a CV-based or certificate-based level if you have one.",
+          "severity": 1,
+          "category": "language",
+          "scope": "line",
+          "quote": "Dutch: native · English: very good · French: basic"
+        }
+      ]
+    },
+    "errors": [],
+    "soft_errors": [],
+    "warnings": [],
+    "dropped": []
+  },
+  "status": "ok",
+  "data": {
+    "agent": "ats",
+    "confidence": 3,
+    "result": "PASS",
+    "knockouts": [
+      {
+        "requirement": "Degree in computer science or a related field (or equivalent experience)",
+        "status": "met",
+        "evidence_quote": "Bachelor in Applied Computer Science (2016 - 2019)"
+      },
+      {
+        "requirement": "2+ years of professional frontend experience",
+        "status": "met",
+        "evidence_quote": "Frontend Developer, Brightwave Digital, Gent (2021 - now)"
+      },
+      {
+        "requirement": "Dutch and English working proficiency (typical Belgian posting)",
+        "status": "met",
+        "evidence_quote": "Dutch: native"
+      }
+    ],
+    "keywords": {
+      "source": "role_typical",
+      "found": [
+        "Frontend",
+        "React",
+        "TypeScript",
+        "CSS",
+        "Sass",
+        "Node.js",
+        "Vue",
+        "design system",
+        "performance",
+        "WordPress",
+        "SEO"
+      ],
+      "missing_required": [
+        "JavaScript",
+        "HTML",
+        "Git"
+      ],
+      "missing_preferred": [
+        "unit testing",
+        "accessibility",
+        "responsive design",
+        "REST APIs",
+        "Agile/Scrum",
+        "CI/CD",
+        "Next.js"
+      ]
+    },
+    "issues": [
+      {
+        "problem": "The experience bullets state duties with no result, metric, scale or technology. 'Improved the performance' tells a recruiter nothing, and 'Responsible for the frontend of several client projects' and 'Helped the juniors' are just as thin. Against 120 applications, nothing here separates this candidate from the rest, and it is the main reason a recruiter would pass.",
+        "fix": "Rewrite each bullet as action, tech and measured result, for example 'Cut Largest Contentful Paint from X s to Y s on the main React/TypeScript web app by code-splitting and image optimisation'. Add the number of client projects, the users or traffic served, the size of the design system and how many developers use it, and how many juniors were mentored.",
+        "severity": 3,
+        "category": "impact",
+        "scope": "line",
+        "quote": "Improved the performance of the main web app"
+      },
+      {
+        "problem": "The Skills section is a table with dot rating bars. A parser flattens it into 'React ●●●●○' strings, and the glyphs are noise. The self-ratings also hurt: TypeScript at 3/5 and Node.js at 2/5 invite a recruiter to screen on the weakest rating. The emoji in 'About me 🚀' and the non-standard heading 'Where I've worked' add further parse risk, since some systems look for 'Experience'.",
+        "fix": "Replace the table with a plain-text list grouped by category, with no ratings, for example 'Languages: TypeScript, JavaScript, HTML, CSS/Sass'. Remove the emoji. Rename the headings to 'Profile' and 'Work experience'.",
+        "severity": 2,
+        "category": "ats_parse",
+        "scope": "section",
+        "quote": "| React | ●●●●○ |"
+      },
+      {
+        "problem": "A typical Frontend Developer posting searches on JavaScript, HTML, Git, testing, accessibility, responsive design, REST APIs and Agile. None of these terms appear anywhere in the resume, so keyword filters will rank it below candidates who list them. Four skills in total is a thin list for a candidate with about 5 years of experience.",
+        "fix": "Add a complete, honest tech list covering JavaScript (ES6+), HTML5, Git, a testing tool if used (Jest, Cypress, Testing Library), accessibility, responsive design, REST/GraphQL APIs, build tools and Agile/Scrum. Also name the stack in the experience bullets, for example the design-system tooling (Storybook, npm package).",
+        "severity": 2,
+        "category": "keywords",
+        "scope": "section",
+        "quote": "Skills"
+      },
+      {
+        "problem": "A date of birth on a Belgian CV breaks the regional convention and brings no benefit. It exposes the candidate to age bias and is clutter for the recruiter.",
+        "fix": "Delete the date of birth. Keep only name, city, phone, email and LinkedIn, and add a GitHub or portfolio link, which matters more for frontend roles.",
+        "severity": 2,
+        "category": "region",
+        "scope": "line",
+        "quote": "Date of birth: {{PII_DOB}}"
+      },
+      {
+        "problem": "Belgian employers expect CEFR levels. 'very good' and 'basic' are not comparable levels, and French is often a screening criterion in Belgium.",
+        "fix": "Write 'Dutch: native · English: C1 · French: A2' (or the real levels), and add a CV-based or certificate-based level if you have one.",
+        "severity": 1,
+        "category": "language",
+        "scope": "line",
+        "quote": "Dutch: native · English: very good · French: basic"
+      }
+    ]
+  }
+}

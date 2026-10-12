@@ -1,0 +1,33 @@
+{
+  "format": "md",
+  "words": 145,
+  "pages": 1,
+  "pages_source": "estimated from word count",
+  "multi_column_suspected": false,
+  "tables": 1,
+  "images": 0,
+  "html_tags": 0,
+  "icons_or_emoji": 1,
+  "rating_bars": 4,
+  "headings": [
+    "{{PII_NAME}}",
+    "About me 🚀",
+    "Where I've worked",
+    "Education",
+    "Skills",
+    "Languages",
+    "Hobbies"
+  ],
+  "standard_sections": [
+    "education",
+    "interests",
+    "languages",
+    "skills",
+    "summary"
+  ],
+  "nonstandard_headings": [
+    "Where I've worked"
+  ],
+  "injection_phrases": [],
+  "hidden_text": []
+}

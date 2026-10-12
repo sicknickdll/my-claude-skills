@@ -1,0 +1,86 @@
+{
+  "agent": "applicant",
+  "attempt": 1,
+  "errors": [],
+  "soft_errors": [],
+  "warnings": [],
+  "dropped": [],
+  "final_view": {
+    "status": "ok",
+    "data": {
+      "agent": "applicant",
+      "confidence": 4,
+      "verdict": "REJECT",
+      "issues": [
+        {
+          "problem": "Every bullet under Brightwave Digital is a vague duty with no number, stack, scale or outcome. 'Improved performance' doesn't say what was slow, what changed or by how much. The strong resumes in this pile say things like 'cut LCP from 4.1s to 1.8s' or 'reduced bundle size by 40%'. After 5 years in the role this reads as junior-level ownership.",
+          "fix": "Rewrite each Brightwave bullet as action + tech + measurable result. For example: 'Cut main web app LCP from X to Y by code-splitting and image optimisation (React, Vite), lifting Lighthouse score from A to B'. Do the same for the design system (number of components, teams, projects using it) and for the client projects (how many, what stack, what scale).",
+          "severity": 3,
+          "category": "impact",
+          "scope": "section",
+          "quote": "Improved the performance of the main web app"
+        },
+        {
+          "problem": "A generic summary of clichés ('hardworking', 'passionate' twice, 'team player') that every applicant uses. It says nothing about years of experience, specialisation or what the candidate offers the employer. 'Where I can grow' puts the candidate's needs first, and the emoji in the heading is out of place on a Belgian CV.",
+          "fix": "Replace it with 2 concrete lines: years of experience, core stack, and one proof point. For example: 'Frontend developer with 5 years of React/TypeScript experience, building a design system and improving the performance of a production web app at an agency in Gent.' Remove the emoji.",
+          "severity": 2,
+          "category": "clarity",
+          "scope": "section",
+          "quote": "Hardworking and passionate frontend developer and team player with a passion for clean code and great user experiences. Looking for a new challenge where I can grow!"
+        },
+        {
+          "problem": "A Belgian CV should not include a date of birth, which invites age bias and is not expected. Language skills also don't use the CEFR scale ('Dutch: native · English: very good · French: basic'), which Belgian employers expect. The dot ratings in the skills table are self-assessed and unverifiable. Taken together, these show the candidate doesn't know local CV conventions, which costs ground against polished applicants.",
+          "fix": "Delete the date of birth. Restate languages as 'Dutch: C2 · English: C1 · French: A2' (or the real levels). Replace the dot-rated skills table with a plain list of technologies grouped by area, for example 'React, TypeScript, Sass, Node.js', with years of use where helpful.",
+          "severity": 2,
+          "category": "region",
+          "scope": "line",
+          "quote": "Date of birth: {{PII_DOB}}"
+        }
+      ],
+      "strength": {
+        "quote": "Worked on a React design system used by the whole team",
+        "why": "It shows work beyond building pages: shared component infrastructure that others rely on. That is relevant to mid-level frontend roles. It would be stronger with numbers (how many components, how many projects)."
+      }
+    },
+    "errors": [],
+    "soft_errors": [],
+    "warnings": [],
+    "dropped": []
+  },
+  "status": "ok",
+  "data": {
+    "agent": "applicant",
+    "confidence": 4,
+    "verdict": "REJECT",
+    "issues": [
+      {
+        "problem": "Every bullet under Brightwave Digital is a vague duty with no number, stack, scale or outcome. 'Improved performance' doesn't say what was slow, what changed or by how much. The strong resumes in this pile say things like 'cut LCP from 4.1s to 1.8s' or 'reduced bundle size by 40%'. After 5 years in the role this reads as junior-level ownership.",
+        "fix": "Rewrite each Brightwave bullet as action + tech + measurable result. For example: 'Cut main web app LCP from X to Y by code-splitting and image optimisation (React, Vite), lifting Lighthouse score from A to B'. Do the same for the design system (number of components, teams, projects using it) and for the client projects (how many, what stack, what scale).",
+        "severity": 3,
+        "category": "impact",
+        "scope": "section",
+        "quote": "Improved the performance of the main web app"
+      },
+      {
+        "problem": "A generic summary of clichés ('hardworking', 'passionate' twice, 'team player') that every applicant uses. It says nothing about years of experience, specialisation or what the candidate offers the employer. 'Where I can grow' puts the candidate's needs first, and the emoji in the heading is out of place on a Belgian CV.",
+        "fix": "Replace it with 2 concrete lines: years of experience, core stack, and one proof point. For example: 'Frontend developer with 5 years of React/TypeScript experience, building a design system and improving the performance of a production web app at an agency in Gent.' Remove the emoji.",
+        "severity": 2,
+        "category": "clarity",
+        "scope": "section",
+        "quote": "Hardworking and passionate frontend developer and team player with a passion for clean code and great user experiences. Looking for a new challenge where I can grow!"
+      },
+      {
+        "problem": "A Belgian CV should not include a date of birth, which invites age bias and is not expected. Language skills also don't use the CEFR scale ('Dutch: native · English: very good · French: basic'), which Belgian employers expect. The dot ratings in the skills table are self-assessed and unverifiable. Taken together, these show the candidate doesn't know local CV conventions, which costs ground against polished applicants.",
+        "fix": "Delete the date of birth. Restate languages as 'Dutch: C2 · English: C1 · French: A2' (or the real levels). Replace the dot-rated skills table with a plain list of technologies grouped by area, for example 'React, TypeScript, Sass, Node.js', with years of use where helpful.",
+        "severity": 2,
+        "category": "region",
+        "scope": "line",
+        "quote": "Date of birth: {{PII_DOB}}"
+      }
+    ],
+    "strength": {
+      "quote": "Worked on a React design system used by the whole team",
+      "why": "It shows work beyond building pages: shared component infrastructure that others rely on. That is relevant to mid-level frontend roles. It would be stronger with numbers (how many components, how many projects)."
+    }
+  }
+}

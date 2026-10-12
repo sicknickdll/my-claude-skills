@@ -1,0 +1,86 @@
+{
+  "agent": "ceo",
+  "attempt": 1,
+  "errors": [],
+  "soft_errors": [],
+  "warnings": [],
+  "dropped": [],
+  "final_view": {
+    "status": "ok",
+    "data": {
+      "agent": "ceo",
+      "confidence": 4,
+      "verdict": "REJECT",
+      "issues": [
+        {
+          "problem": "Five years of experience and not one number or outcome. I can't tell what was slow, what was done, or what changed for users or the business. 'Responsible for', 'worked on' and 'helped the juniors' describe duties, not results. Most of the 120 applications will be equally vague, and the ~10% that advance will show measurable impact.",
+          "fix": "Rewrite each Brightwave bullet as action plus measurable result, e.g. 'Cut Largest Contentful Paint from 4.1s to 1.8s on the main web app by code-splitting and image optimisation, lifting checkout conversion X%'. Name the clients or product types, the team size, the design system's adoption (components, teams, hours saved) and how many juniors you mentored.",
+          "severity": 3,
+          "category": "impact",
+          "scope": "section",
+          "quote": "Improved the performance of the main web app"
+        },
+        {
+          "problem": "Generic filler that every applicant writes. It says nothing about seniority, domain, scale or what I would get by hiring this person. The rocket emoji in the heading and 'Looking for a new challenge where I can grow!' read as junior and make me skim past the whole top of the page.",
+          "fix": "Replace it with a 2-line factual summary: years of experience, stack (React, TypeScript, design systems), the kind of products built, and your strongest result. Delete the emoji and the 'grow' line.",
+          "severity": 2,
+          "category": "clarity",
+          "scope": "section",
+          "quote": "Hardworking and passionate frontend developer and team player with a passion for clean code and great user experiences."
+        },
+        {
+          "problem": "Date of birth on a Belgian CV breaks the convention and invites bias. The language line also uses 'native', 'very good' and 'basic' instead of CEFR levels, which Belgian employers expect to see for Dutch, French and English. Together these make the CV look unprepared for this market.",
+          "fix": "Remove the date of birth. Write 'Dutch: C2 · English: C1 · French: A2' with your real levels. Keep the CV to one A4 page and drop the hobbies and 'References available on request' to make room for results.",
+          "severity": 2,
+          "category": "region",
+          "scope": "line",
+          "quote": "Date of birth: {{PII_DOB}}"
+        }
+      ],
+      "strength": {
+        "quote": "Worked on a React design system used by the whole team",
+        "why": "It is the one line that shows leverage: shared infrastructure other people depend on, in the stack this role needs. It would stand out if it carried scope and measurable adoption."
+      }
+    },
+    "errors": [],
+    "soft_errors": [],
+    "warnings": [],
+    "dropped": []
+  },
+  "status": "ok",
+  "data": {
+    "agent": "ceo",
+    "confidence": 4,
+    "verdict": "REJECT",
+    "issues": [
+      {
+        "problem": "Five years of experience and not one number or outcome. I can't tell what was slow, what was done, or what changed for users or the business. 'Responsible for', 'worked on' and 'helped the juniors' describe duties, not results. Most of the 120 applications will be equally vague, and the ~10% that advance will show measurable impact.",
+        "fix": "Rewrite each Brightwave bullet as action plus measurable result, e.g. 'Cut Largest Contentful Paint from 4.1s to 1.8s on the main web app by code-splitting and image optimisation, lifting checkout conversion X%'. Name the clients or product types, the team size, the design system's adoption (components, teams, hours saved) and how many juniors you mentored.",
+        "severity": 3,
+        "category": "impact",
+        "scope": "section",
+        "quote": "Improved the performance of the main web app"
+      },
+      {
+        "problem": "Generic filler that every applicant writes. It says nothing about seniority, domain, scale or what I would get by hiring this person. The rocket emoji in the heading and 'Looking for a new challenge where I can grow!' read as junior and make me skim past the whole top of the page.",
+        "fix": "Replace it with a 2-line factual summary: years of experience, stack (React, TypeScript, design systems), the kind of products built, and your strongest result. Delete the emoji and the 'grow' line.",
+        "severity": 2,
+        "category": "clarity",
+        "scope": "section",
+        "quote": "Hardworking and passionate frontend developer and team player with a passion for clean code and great user experiences."
+      },
+      {
+        "problem": "Date of birth on a Belgian CV breaks the convention and invites bias. The language line also uses 'native', 'very good' and 'basic' instead of CEFR levels, which Belgian employers expect to see for Dutch, French and English. Together these make the CV look unprepared for this market.",
+        "fix": "Remove the date of birth. Write 'Dutch: C2 · English: C1 · French: A2' with your real levels. Keep the CV to one A4 page and drop the hobbies and 'References available on request' to make room for results.",
+        "severity": 2,
+        "category": "region",
+        "scope": "line",
+        "quote": "Date of birth: {{PII_DOB}}"
+      }
+    ],
+    "strength": {
+      "quote": "Worked on a React design system used by the whole team",
+      "why": "It is the one line that shows leverage: shared infrastructure other people depend on, in the stack this role needs. It would stand out if it carried scope and measurable adoption."
+    }
+  }
+}
