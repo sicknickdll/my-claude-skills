@@ -12,3 +12,6 @@ vig = 1 - 0.06 * (((x - W / 2) / (W / 2)) ** 2 + ((y - H / 2) / (H / 2)) ** 2)
 shade = (fine * 3 + coarse * 0.10 + fibres * 0.04)
 img = (base[None, None, :] * vig[..., None] + shade[..., None]).clip(0, 255).astype("uint8")
 Image.fromarray(img).save("paper.jpg", quality=88)
+# grain.jpg: same texture normalised to ~white, multiplied over every frame
+g = (img / base * 255).clip(0, 255).mean(axis=2, keepdims=True).repeat(3, axis=2)
+Image.fromarray(g.astype("uint8")).save("grain.jpg", quality=88)

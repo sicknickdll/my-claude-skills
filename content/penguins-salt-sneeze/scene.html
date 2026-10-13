@@ -1,12 +1,13 @@
 <!doctype html>
 <html><head><meta charset="utf-8"><title>Penguins drink seawater</title>
-<style>html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#EFE6D3 url(../../brand/paper.jpg) 0 0/1080px 1920px}</style>
+<style>html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#EFE6D3}
+#grain{position:fixed;inset:0;background:url(../../brand/grain.jpg) 0 0/1080px 1920px;mix-blend-mode:multiply;pointer-events:none}</style>
 </head><body>
-<div id="stage"></div>
+<div id="stage"></div><div id="grain"></div>
 <script src="../../brand/kit.js"></script>
 <script src="build/data.js"></script>
 <script>
-const K = KIT, { C, clamp, lerp, prog, ease, stamped, label, circleCallout, text } = K;
+const K = KIT, { C, clamp, lerp, prog, ease, label, text } = K;
 const Q = window.CUES, MOUTH = window.MOUTH, FPS = 30;
 const S = (i) => Q[i].start, Wd = (i, w) => Q[i].words[w];
 
@@ -37,8 +38,8 @@ function waves(t, y0, rows = 3) {
 
 // Big penguin head in profile, facing left. Origin ~ centre of head.
 function head(t, { gland = 0, drop = null, nostril = true } = {}) {
-  let s = `<path d="M-150,60 C-200,260 -190,460 -170,760 L380,760 C340,420 300,180 200,30 Z" fill="${C.navy}"/>
-    <path d="M-150,130 C-196,280 -188,460 -170,760 L-10,760 C-40,520 -60,300 -50,170 Z" fill="${C.cream}"/>
+  let s = `<path d="M-150,60 C-200,260 -190,460 -170,1500 L380,1500 C340,420 300,180 200,30 Z" fill="${C.navy}"/>
+    <path d="M-150,130 C-196,280 -188,460 -170,1500 L-10,1500 C-40,520 -60,300 -50,170 Z" fill="${C.cream}"/>
     <circle cx="40" cy="-40" r="232" fill="${C.navy}"/>
     <path d="M-150,-30 L-440,36 L-150,86 Z" fill="${C.navy}"/>
     <path d="M-162,30 L-428,38" stroke="${C.cream}" stroke-width="5" stroke-linecap="round"/>
@@ -48,13 +49,6 @@ function head(t, { gland = 0, drop = null, nostril = true } = {}) {
   if (gland > 0) s += `<g transform="translate(-40 -152) rotate(-12) scale(${gland})"><ellipse rx="74" ry="30" fill="${C.red}"/><ellipse cx="-20" cy="-6" rx="22" ry="7" fill="${C.cream}" opacity=".55"/></g>`;
   if (drop) s += drop;
   return s;
-}
-
-function panel(inner, o = 1) { // Vox-style framed card in the visual zone
-  return `<g opacity="${o}"><clipPath id="pc"><rect x="70" y="200" width="940" height="790" rx="6"/></clipPath>
-    <rect x="70" y="200" width="940" height="790" rx="6" fill="${C.paper}"/>
-    <g clip-path="url(#pc)">${inner}</g>
-    <rect x="70" y="200" width="940" height="790" rx="6" fill="none" stroke="${C.navy}" stroke-width="9"/></g>`;
 }
 
 function drip(t) { // salty drop: forms at the nostril, slides down the beak, falls off the tip
@@ -70,157 +64,187 @@ function star4(x, y, r, fill) {
   return `<path transform="translate(${x} ${y})" d="M0,${-r} Q${r * .18},${-r * .18} ${r},0 Q${r * .18},${r * .18} 0,${r} Q${-r * .18},${r * .18} ${-r},0 Q${-r * .18},${-r * .18} 0,${-r} Z" fill="${fill}"/>`;
 }
 
-// scene window: visible from a to b, with 0.2 s fade overlap
-const win = (t, a, b) => (t < a || t > b + 0.2) ? 0 : Math.min(clamp((t - a) / 0.15), clamp((b + 0.2 - t) / 0.2));
+function glass(t, t0) { // glass of seawater with salt falling in; local origin = centre
+  let salt = "";
+  for (let i = 0; i < 9; i++) {
+    const a = t0 + 0.25 + i * 0.12, k = clamp((t - a) / 0.6), sx = -90 + (i * 71) % 180;
+    if (t > a) { const y = lerp(-420, -60 + (i % 3) * 70, ease.inOut(k)); salt += `<rect x="${sx}" y="${y}" width="22" height="22" transform="rotate(${i * 23} ${sx + 11} ${y + 11})" fill="${C.cream}" stroke="${C.navy}" stroke-width="3"/>`; }
+  }
+  return `<path d="M-128,-100 q34,-22 68,0 q34,22 68,0 q34,-22 68,0 q34,22 68,0 L115,190 L-115,190 Z" fill="${C.navy}"/>${salt}
+    <path d="M-150,-190 L150,-190 L115,200 L-115,200 Z" fill="none" stroke="${C.navy}" stroke-width="12" stroke-linejoin="round"/>`;
+}
+
+const bg = (dx, col = C.paper) => `<rect x="${dx}" y="0" width="1080" height="1920" fill="${col}"/>`;
+const tag = (t, at, x, y, str, { size = 40, w = null } = {}) => { // Vox highlighter tag: red box, cream type
+  if (t < at) return "";
+  const ww = w ?? str.length * size * 0.72 + 30;
+  return K.highlight(t, at, x, y - size * 1.05, ww, size * 1.4) +
+    `<g opacity="${clamp((t - at - 0.1) / 0.15)}">${text(x + 15, y, str, { size, fill: C.cream, ls: 0.06, upper: true })}</g>`;
+};
+const arrow = (t, at, d, len = 260) => t < at ? "" :
+  `<path d="${d}" fill="none" stroke="${C.red}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${len}" stroke-dashoffset="${len * (1 - ease.out(prog(t, at, 0.35)))}"/>`;
+
+// ---------------- shots ----------------
+function sIntro(t, dx, blur) {
+  const keys = [{ t: 0, x: 540, y: 600, s: 1 }, { t: S(1), x: 540, y: 612, s: 1.07 }];
+  const pose = K.hops(t, { x: -220, y: 1180, s: 1.3 }, [{ at: 0.05, x: 540, h: 260, dur: 0.6 }]);
+  const w = 420 * ease.out(prog(t, 0.05, 0.45)), ring = 2 * Math.PI * 382;
+  const ink = `<circle cx="540" cy="830" r="360" fill="${C.cream}"/>
+    <circle cx="540" cy="830" r="382" fill="none" stroke="${C.navy}" stroke-width="8" stroke-dasharray="${ring}" stroke-dashoffset="${ring * (1 - ease.out(prog(t, 0.1, 0.7)))}"/>
+    <line x1="${540 - w}" y1="170" x2="${540 + w}" y2="170" stroke="${C.navy}" stroke-width="7"/>
+    <line x1="${540 - w}" y1="505" x2="${540 + w}" y2="505" stroke="${C.navy}" stroke-width="7"/>
+    ${K.frog({ ...pose, mouth: MOUTH[Math.round(t * FPS)] || 0, blink: K.blink(t), gaze: 0 })}`;
+  const hl = t > 0.95;
+  const crisp = K.typeOn(t, 0.12, 540, 320, "Did you", { size: 140, anchor: "middle", cps: 16 }) +
+    K.highlight(t, 0.95, 345, 368, 390, 128) +
+    K.typeOn(t, 0.56, 540, 470, "know?", { size: 140, anchor: "middle", cps: 16, fill: hl ? C.cream : C.navy });
+  return bg(dx) + K.shot(t, keys, { ink, crisp, dx, extraBlur: blur });
+}
+
+const ANT = "M1000,420 C1250,400 1520,520 1600,760 C1680,980 1640,1240 1480,1400 C1380,1500 1250,1520 1140,1450 C1060,1400 1000,1470 900,1520 C760,1580 560,1500 470,1330 C380,1170 420,1000 520,900 C560,860 540,800 470,740 C400,680 330,600 300,520 C350,560 440,600 520,640 C600,680 640,640 700,580 C780,500 880,430 1000,420 Z";
+function sMap(t, dx, blur) {
+  const keys = [{ t: S(1) - 0.3, x: 1000, y: 1000, s: 0.5, r: -10 }, { t: S(1) + 1.3, x: 600, y: 900, s: 1.35, r: 0 }, { t: S(2) + 0.3, x: 585, y: 885, s: 1.5 }];
+  let marks = "";
+  for (let i = 0; i < 90; i++) {
+    const x = (i * 397) % 2600 - 300, y = (i * 271) % 2600 - 300;
+    if (Math.hypot(x - 1000, y - 1000) > 720) marks += `<path d="M${x},${y} q15,-12 30,0 q15,12 30,0" fill="none" stroke="${C.cream}" stroke-width="5" opacity=".55"/>`;
+  }
+  const pk = prog(t, S(1) + 0.55, 0.35), py = lerp(560, 880, ease.back(pk));
+  const ink = `<rect x="-3000" y="-3000" width="8000" height="8000" fill="${C.navy}"/>${marks}
+    <circle cx="1000" cy="1000" r="780" fill="none" stroke="${C.cream}" stroke-width="3" stroke-dasharray="14 18" opacity=".5"/>
+    <circle cx="1000" cy="1000" r="1000" fill="none" stroke="${C.cream}" stroke-width="3" stroke-dasharray="14 18" opacity=".5"/>
+    <path d="${ANT}" fill="${C.cream}"/>
+    ${t > S(1) + 0.55 ? `<g transform="translate(560 ${py})"><path d="M0,0 L-16,-46 A26,26 0 1,1 16,-46 Z" fill="${C.red}"/><circle cx="0" cy="-62" r="9" fill="${C.cream}"/></g>` : ""}`;
+  const crisp = text(720, 1030, "ANTARCTICA", { size: 46, anchor: "middle", ls: 0.2 }) + text(1000, 300, "SOUTHERN OCEAN", { size: 44, anchor: "middle", fill: C.cream, ls: 0.25 });
+  // photo card slides in on top of the map (screen space)
+  const ck = prog(t, S(1) + 0.95, 0.5), cy = lerp(2300, 640, ease.out(ck)), dip = Math.sin(Math.PI * clamp((t - S(1) - 1.6) / 1.1)) * -18;
+  const card = t < S(1) + 0.95 ? "" : `<g transform="translate(540 ${cy}) rotate(-4)">
+      <rect x="-310" y="-330" width="620" height="660" fill="${C.cream}" stroke="${C.navy}" stroke-width="4"/>
+      <clipPath id="cardc"><rect x="-280" y="-300" width="560" height="520"/></clipPath>
+      <g clip-path="url(#cardc)"><rect x="-280" y="-300" width="560" height="520" fill="${C.paper}"/>
+        <rect x="-280" y="80" width="560" height="200" fill="${C.navy}"/>
+        <g transform="translate(-540 -800)">${waves(t, 920, 3).replace(/stroke="#1E3473"/g, `stroke="${C.cream}"`)}</g>
+        <path d="M-160,90 L160,90 L130,130 L-130,130 Z" fill="${C.cream}" stroke="${C.navy}" stroke-width="6"/>
+        ${penguin(0, 92, 0.8, dip)}</g>
+      <rect x="-90" y="-356" width="180" height="48" fill="${C.red}" opacity=".9" transform="rotate(5)"/></g>`;
+  const screen = tag(t, Wd(1, 3), 250, 1035, "seawater", { size: 54 });
+  return bg(dx) + K.shot(t, keys, { ink, crisp, screenInk: card, screen, dx, extraBlur: blur });
+}
+
+function sNotes(t, dx, blur) {
+  const keys = [{ t: S(2) - 0.25, x: 560, y: 430, s: 1.25, r: -3 }, { t: S(2) + 1.2, x: 560, y: 600, s: 1.0, r: -1 }, { t: Wd(2, 5) - 0.2, x: 700, y: 860, s: 1.12, r: 0 }, { t: S(3) + 0.4, x: 720, y: 900, s: 1.2 }];
+  let bars = "";
+  for (let i = 0; i < 26; i++) { const y = 640 + i * 34, w = 220 + ((i * 53) % 130); bars += `<rect x="160" y="${y}" width="${i % 7 === 6 ? w * 0.5 : w + 110}" height="12" fill="${C.navy}" opacity=".28"/>`; }
+  for (let i = 0; i < 9; i++) { const y = 1260 + i * 34; bars += `<rect x="620" y="${y}" width="${260 + ((i * 41) % 110)}" height="12" fill="${C.navy}" opacity=".28"/>`; }
+  const X = Wd(2, 5);
+  const ink = `<rect x="-400" y="-400" width="1880" height="3000" fill="${C.cream}"/>
+    <line x1="120" y1="-400" x2="120" y2="2600" stroke="${C.red}" stroke-width="4" opacity=".7"/>
+    <line x1="120" y1="262" x2="1020" y2="262" stroke="${C.navy}" stroke-width="5"/><line x1="120" y1="276" x2="1020" y2="276" stroke="${C.navy}" stroke-width="2"/>
+    ${bars}
+    <g transform="translate(790 980) scale(.85)">${glass(t, S(2) + 0.3)}</g>
+    ${K.stamped(t, X, 790, 980, `<path d="M660,830 L920,1130 M920,830 L660,1130" stroke="${C.red}" stroke-width="40" stroke-linecap="round"/>`, { rot: 4 })}`;
+  const crisp = K.typeOn(t, S(2) + 0.1, 160, 230, "FIELD NOTES · Nº 1", { size: 38, ls: 0.12, cps: 30 }) +
+    text(160, 400, "Seawater is", { size: 110 }) +
+    K.drawText(t, S(2) + 0.45, 160, 530, "3.5 % salt", { size: 130, anchor: "start", dur: 0.9 }) +
+    K.highlight(t, S(2) + 1.3, 160, 552, 620, 20) +
+    tag(t, X + 0.2, 640, 1220, "for humans", { size: 36 });
+  return bg(dx) + K.shot(t, keys, { ink, crisp, dx, extraBlur: blur });
+}
+
+const HEADW = (inner = "") => `<circle cx="560" cy="640" r="520" fill="${C.cream}"/><circle cx="560" cy="640" r="548" fill="none" stroke="${C.navy}" stroke-width="8"/>${inner}`;
+function sHead(t, dx, blur) {
+  const G = Wd(3, 3), E = Wd(4, 3);
+  const keys = [{ t: S(3) - 0.3, x: 500, y: 650, s: 0.85 }, { t: S(3) + 0.5, x: 520, y: 640, s: 1.0 }, { t: G + 0.15, x: 560, y: 520, s: 1.6 },
+    { t: S(4) + 0.4, x: 520, y: 590, s: 1.45 }, { t: S(5) - 0.5, x: 525, y: 585, s: 1.5 }, { t: S(5), x: 572, y: 518, s: 16, e: "in" }];
+  const g = t < G ? 0 : ease.back(prog(t, G, 0.35));
+  const ink = HEADW(`<g transform="translate(620 700) scale(1.2)">${head(t, { gland: g })}</g>`);
+  const crisp = K.circleCallout(t, G + 0.15, 572, 518, 125, 66) +
+    tag(t, G + 0.35, 250, 395, "salt gland", { size: 38 }) + arrow(t, G + 0.4, "M400,410 L470,475", 110) +
+    arrow(t, E, "M455,500 Q395,580 490,630", 200) + tag(t, E + 0.15, 280, 720, "eye", { size: 38 });
+  const flash = `<rect width="1080" height="1920" fill="${C.red}" opacity="${prog(t, S(5) - 0.18, 0.16)}"/>`;
+  return bg(dx) + K.shot(t, keys, { ink, crisp, screen: flash, dx, extraBlur: blur });
+}
+
+function sGland(t, dx, blur) {
+  const keys = [{ t: S(5), x: 540, y: 560, s: 3.2 }, { t: S(5) + 0.9, x: 540, y: 600, s: 1.0, e: "out" }, { t: S(6), x: 500, y: 610, s: 1.06 }, { t: S(7), x: 590, y: 590, s: 1.12 }];
+  const u = t - S(5);
+  let grid = "", cells = "", salt = "";
+  for (let x = -600; x <= 1700; x += 60) grid += `<line x1="${x}" y1="-600" x2="${x}" y2="1900" stroke="${C.navy}" stroke-width="2" opacity=".12"/>`;
+  for (let y = -600; y <= 1900; y += 60) grid += `<line x1="-600" y1="${y}" x2="1700" y2="${y}" stroke="${C.navy}" stroke-width="2" opacity=".12"/>`;
+  for (let i = 0; i < 20; i++) cells += `<circle cx="${-80 + ((i * 113 + u * 190) % 1240)}" cy="${645 + ((i * 37) % 60)}" r="15" fill="${C.red}"/>`;
+  for (let i = 0; i < 9; i++) {
+    const p = ((i / 9) + u * 0.22) % 1;
+    let x, y;
+    if (p < 0.55) { x = lerp(-60, 520, p / 0.55); y = 670 + ((i * 29) % 40) - 20; } else { const k = ease.inOut((p - 0.55) / 0.45); x = lerp(520, 540, k); y = lerp(670, 400, k); }
+    if (p < 0.97) salt += `<rect x="${x - 12}" y="${y - 12}" width="24" height="24" transform="rotate(${i * 31 + u * 40} ${x} ${y})" fill="${C.navy}"/>`;
+  }
+  const drop = 30 + 26 * clamp(u / 5);
+  const ink = `<rect x="-800" y="-800" width="2700" height="2900" fill="${C.paper}"/>${grid}
+    <path d="M-600,610 L1700,610 M-600,730 L1700,730" stroke="${C.red}" stroke-width="12"/>${cells}
+    <ellipse cx="540" cy="560" rx="150" ry="70" fill="${C.red}"/>${salt}
+    <path transform="translate(540 380) scale(${drop / 30})" d="M0,-44 C14,-20 30,-4 30,14 A30,30 0 1,1 -30,14 C-30,-4 -14,-20 0,-44 Z" fill="${C.cream}" stroke="${C.navy}" stroke-width="6"/>
+    ${K.stamped(t, Wd(6, 4), 540, 560, `<rect x="440" y="530" width="200" height="62" fill="${C.navy}"/>` + text(540, 576, "FILTER", { size: 40, fill: C.cream, anchor: "middle" }), { rot: -3 })}`;
+  const crisp = K.typeOn(t, S(5) + 0.9, 540, 250, "INSIDE THE SALT GLAND", { size: 44, anchor: "middle", ls: 0.12, cps: 28 }) +
+    label(t, S(5) + 1.0, 110, 830, "salty blood", { size: 38 }) + label(t, S(5) + 1.3, 970, 830, "clean blood", { size: 38, anchor: "end" }) +
+    label(t, Wd(5, 2), 610, 380, "salt out", { size: 38, fill: C.navy });
+  const flash = `<rect width="1080" height="1920" fill="${C.red}" opacity="${1 - prog(t, S(5), 0.3)}"/>`;
+  return bg(dx) + K.shot(t, keys, { ink, crisp, screen: flash, dx, extraBlur: blur });
+}
+
+function sSneeze(t, dx, blur) {
+  const ach = S(9), wind = Wd(8, 2), gone = Wd(9, 2);
+  const keys = [{ t: S(7), x: 380, y: 700, s: 1.6 }, { t: S(7) + 1.6, x: 250, y: 730, s: 1.6 }, { t: S(8), x: 330, y: 690, s: 1.5 },
+    { t: wind, x: 340, y: 680, s: 1.5 }, { t: ach, x: 380, y: 650, s: 1.9, e: "in" }, { t: ach + 0.3, x: 430, y: 640, s: 1.05, e: "out" }, { t: S(10), x: 440, y: 640, s: 1.0 }];
+  let rot = 0;
+  if (t > wind && t < ach) rot = 9 * ease.inOut(prog(t, wind, ach - wind));
+  if (t >= ach) { const k = t - ach; rot = 9 - 24 * ease.out(clamp(k / 0.12)) + 15 * clamp((k - 0.12) / 0.5); }
+  let spray = "", sparkle = "";
+  if (t >= ach && t < ach + 1.2) {
+    const k = t - ach;
+    for (let i = 0; i < 16; i++) {
+      const a = Math.PI * (0.85 + (i / 16) * 0.5), v = 520 + (i * 97) % 380;
+      spray += `<circle cx="${-430 + Math.cos(a) * v * k}" cy="${40 - Math.sin(a) * v * k * 0.6 + 600 * k * k}" r="${10 + (i % 3) * 5}" fill="${C.cream}" stroke="${C.navy}" stroke-width="3" opacity="${1 - k / 1.2}"/>`;
+    }
+  }
+  if (t > gone) for (let i = 0; i < 5; i++) {
+    const k = ease.back(prog(t, gone + i * 0.08, 0.3)), [sx, sy] = [[120, 560], [260, 500], [60, 760], [330, 620], [190, 860]][i];
+    sparkle += star4(sx, sy, 34 * k * (1 + 0.15 * Math.sin(t * 9 + i)), i % 2 ? C.red : C.navy);
+  }
+  const ink = HEADW(`<g transform="translate(620 700) scale(1.2) rotate(${rot} 40 200)">${head(t, { gland: 1, drop: t < ach ? drip(t - S(7)) : "" })}${spray}</g>`) + sparkle;
+  const crisp = tag(t, Wd(7, 6), 170, 860, "nostril", { size: 38 }) + arrow(t, Wd(7, 6) + 0.1, "M300,830 L360,720", 130);
+  let screen = "";
+  if (t >= ach) {
+    const k = prog(t, ach, 0.22), s = lerp(2.2, 1, ease.out(k));
+    screen = `<g opacity="${clamp(k * 3)}" transform="translate(540 330) rotate(-6) scale(${s}) translate(-540 -330)">${text(540, 380, "ACHOO!", { size: 170, fill: C.red, anchor: "middle" })}</g>`;
+  }
+  return bg(dx) + K.shot(t, keys, { ink, crisp, screen, dx, extraBlur: blur, shk: K.shake(t, ach, 22, 5) });
+}
+
+function sEnd(t, dx, blur) {
+  const keys = [{ t: S(10) - 0.4, x: 540, y: 600, s: 1 }, { t: 30, x: 540, y: 620, s: 1.06 }];
+  const pose = K.hops(t, { x: 540, y: 2150, s: 1.3 }, [{ at: S(10) + 0.15, x: 540, y: 1240, h: 220, dur: 0.6 }]);
+  let stars = "";
+  for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2 + 0.3; stars += star4(540 + Math.cos(a) * 205, 520 + Math.sin(a) * 240, 22, C.cream); }
+  const tip = (t - Wd(10, 3)) / 0.7, hat = tip > 0 && tip < 1 ? { hatY: -45 * Math.sin(Math.PI * tip), hatRot: -14 * Math.sin(Math.PI * tip) } : {};
+  const ink = K.stamped(t, S(10) + 0.05, 540, 520, `<ellipse cx="540" cy="520" rx="290" ry="320" fill="${C.navy}"/>
+      <ellipse cx="540" cy="520" rx="270" ry="300" fill="none" stroke="${C.cream}" stroke-width="7"/>${stars}` +
+      text(540, 620, "?", { size: 290, fill: C.cream, anchor: "middle" }), { rot: -3 }) +
+    K.frog({ ...pose, mouth: MOUTH[Math.min(MOUTH.length - 1, Math.round(t * FPS))] || 0, blink: K.blink(t), gaze: 0, ...hat });
+  return bg(dx) + K.shot(t, keys, { ink, dx, extraBlur: blur });
+}
+
+const SHOTS = [
+  { a: 0, b: S(1), draw: sIntro }, { a: S(1), b: S(2), draw: sMap }, { a: S(2), b: S(3), draw: sNotes },
+  { a: S(3), b: S(5), draw: sHead }, { a: S(5), b: S(7), draw: sGland }, { a: S(7), b: S(10), draw: sSneeze }, { a: S(10), b: 31, draw: sEnd },
+];
+const TRANS = [{ type: "brush", dur: 0.5 }, { type: "push", dur: 0.45 }, { type: "tear", dur: 0.6 }, { type: "cut", dur: 0 }, { type: "push", dur: 0.45 }, { type: "iris", dur: 0.7, cx: 300, cy: 700 }];
 
 function renderFrame(t) {
-  const fr = Math.min(MOUTH.length - 1, Math.round(t * FPS));
-  let ink = "", over = ""; // ink = block-print layer (filtered); over = crisp labels/type
-
-  // ---- A: title "Did you know?"
-  let o = win(t, 0, S(1));
-  if (o) {
-    ink += `<g opacity="${o}">` +
-      stamped(t, 0.15, 470, 600, text(150, 640, "Did you", { size: 170 }), { rot: -2 }) +
-      stamped(t, 0.45, 470, 790, text(150, 820, "know?", { size: 220 }), { rot: -2 }) +
-      stamped(t, 0.8, 820, 420, `<rect x="760" y="360" width="124" height="124" rx="6" fill="${C.red}"/>` + text(822, 462, "?", { size: 110, fill: C.cream, anchor: "middle" }), { rot: 8 }) +
-      (t > 0.9 ? `<rect x="150" y="852" width="${560 * ease.out(prog(t, 0.9, 0.3))}" height="20" fill="${C.red}"/>` : "") + `</g>`;
-  }
-
-  // ---- B: penguin on the waves
-  o = win(t, S(1), S(2));
-  if (o) {
-    const u = t - S(1), dip = Math.sin(Math.PI * clamp((u - 0.9) / 1.2)) * -22;
-    const rise = 60 * (1 - ease.out(prog(u, 0, 0.5)));
-    ink += `<g opacity="${o}"><g transform="translate(0 ${rise})">${waves(t, 905)}</g>
-      <path d="M380,890 L760,890 L730,940 L410,940 Z" fill="${C.cream}" stroke="${C.navy}" stroke-width="9"/>
-      ${stamped(t, S(1) + 0.15, 570, 700, penguin(570, 892, 1, dip))}</g>`;
-    over += `<g opacity="${o}">${label(t, Wd(1, 3), 120, 300, "seawater", { to: [250, 905], size: 44 })}</g>`;
-  }
-
-  // ---- C: glass of seawater + red X
-  o = win(t, S(2), S(3));
-  if (o) {
-    const u = t - S(2), X = Wd(2, 5);
-    let salt = "";
-    for (let i = 0; i < 9; i++) {
-      const a = 0.25 + i * 0.12, k = clamp((u - a) / 0.6), sx = 450 + (i * 71) % 180;
-      if (u > a) salt += `<rect x="${sx}" y="${lerp(330, 700 + (i % 3) * 70, ease.inOut(k))}" width="22" height="22" transform="rotate(${i * 23} ${sx + 11} ${lerp(341, 711, k)})" fill="${C.cream}" stroke="${C.navy}" stroke-width="3"/>`;
-    }
-    const wv = `M412,650 q34,-22 68,0 q34,22 68,0 q34,-22 68,0 q34,22 68,0 L655,940 L425,940 Z`;
-    ink += `<g opacity="${o}">${stamped(t, S(2) + 0.05, 540, 750,
-      `<path d="${wv}" fill="${C.navy}"/>${salt}<path d="M390,560 L690,560 L655,950 L425,950 Z" fill="none" stroke="${C.navy}" stroke-width="12" stroke-linejoin="round"/>`)}
-      ${stamped(t, X, 540, 750, `<path d="M400,580 L680,930 M680,580 L400,930" stroke="${C.red}" stroke-width="40" stroke-linecap="round"/>`, { rot: 4 })}</g>`;
-    over += `<g opacity="${o}">${label(t, S(2) + 0.6, 540, 470, "≈ 3.5 % salt", { anchor: "middle", fill: C.navy, size: 50 })}</g>`;
-  }
-
-  // ---- D: head profile, salt gland callout
-  o = win(t, S(3), S(5));
-  if (o) {
-    const u = t - S(3), sc = lerp(0.75, 1, ease.out(prog(u, 0, 0.5)));
-    const g = t < Wd(3, 3) ? 0 : ease.back(prog(t, Wd(3, 3), 0.35));
-    ink += panel(`<g transform="translate(620 ${640}) scale(${sc})">${head(t, { gland: g })}</g>` +
-      circleCallout(t, Wd(3, 3) + 0.15, 580, 488, 120, 66) +
-      (t > Wd(4, 3) ? `<path d="M520,560 Q470,600 520,640" fill="none" stroke="${C.red}" stroke-width="8" stroke-linecap="round" stroke-dasharray="200" stroke-dashoffset="${200 * (1 - ease.out(prog(t, Wd(4, 3), 0.35)))}"/>` : ""), o);
-    over += `<g opacity="${o}">${label(t, Wd(3, 3) + 0.3, 130, 300, "salt gland", { to: [500, 450], size: 44 })}
-      ${label(t, Wd(4, 3), 120, 820, "eye", { to: [540, 600], size: 44 })}</g>`;
-  }
-
-  // ---- E: blood-vessel diagram
-  o = win(t, S(5), S(7));
-  if (o) {
-    const u = t - S(5);
-    let cells = "", salt = "";
-    for (let i = 0; i < 18; i++) {
-      const x = 40 + ((i * 113 + u * 190) % 1000), yy = 560 + ((i * 37) % 60);
-      cells += `<circle cx="${x}" cy="${yy}" r="15" fill="${C.red}"/>`;
-    }
-    for (let i = 0; i < 9; i++) {
-      const p = ((i / 9) + u * 0.22) % 1;
-      let x, y;
-      if (p < 0.55) { x = lerp(40, 520, p / 0.55); y = 580 + ((i * 29) % 40) - 10; }
-      else { const k = ease.inOut((p - 0.55) / 0.45); x = lerp(520, 540, k); y = lerp(580, 330, k); }
-      if (!(p > 0.97)) salt += `<rect x="${x - 12}" y="${y - 12}" width="24" height="24" transform="rotate(${i * 31 + u * 40} ${x} ${y})" fill="${C.navy}"/>`;
-    }
-    const drop = 30 + 26 * clamp(u / 5);
-    ink += panel(`<g transform="translate(0 90)"><path d="M0,520 L1080,520 M0,640 L1080,640" stroke="${C.red}" stroke-width="12"/>
-      <rect x="0" y="526" width="1080" height="108" fill="${C.cream}" opacity=".6"/>
-      ${cells}
-      <ellipse cx="540" cy="470" rx="150" ry="70" fill="${C.red}"/>
-      ${salt}
-      <path transform="translate(540 300) scale(${drop / 30})" d="M0,-44 C14,-20 30,-4 30,14 A30,30 0 1,1 -30,14 C-30,-4 -14,-20 0,-44 Z" fill="${C.cream}" stroke="${C.navy}" stroke-width="6"/>
-      ${stamped(t, Wd(6, 4), 540, 470, `<rect x="440" y="440" width="200" height="62" fill="${C.navy}"/>` + text(540, 486, "FILTER", { size: 40, fill: C.cream, anchor: "middle" }), { rot: -3 })}</g>`, o);
-    over += `<g opacity="${o}" transform="translate(0 90)">${label(t, S(5) + 0.3, 110, 740, "salty blood", { size: 38 })}
-      ${label(t, S(5) + 0.9, 960, 740, "clean blood", { size: 38, anchor: "end" })}
-      ${label(t, Wd(5, 2), 610, 290, "salt out", { size: 38, fill: C.navy })}</g>`;
-  }
-
-  // ---- F + G: drip, wind-up, ACHOO
-  o = win(t, S(7), S(10));
-  if (o) {
-    const ach = S(9), wind = Wd(8, 2);
-    let rot = 0;
-    if (t > wind && t < ach) rot = 9 * ease.inOut(prog(t, wind, ach - wind));       // ah... ah...
-    if (t >= ach) { const k = t - ach; rot = 9 - 24 * ease.out(clamp(k / 0.12)) + 15 * clamp((k - 0.12) / 0.5) + Math.sin(k * 40) * 3 * Math.exp(-k * 6); }
-    const showDrip = t < ach;
-    let spray = "";
-    if (t >= ach && t < ach + 1.2) {
-      const k = t - ach;
-      for (let i = 0; i < 14; i++) {
-        const a = Math.PI * (0.85 + (i / 14) * 0.5), v = 500 + (i * 97) % 350;
-        const x = -430 + Math.cos(a) * v * k, y = 40 + Math.sin(a) * v * k * -0.6 + 600 * k * k;
-        spray += `<circle cx="${x}" cy="${y}" r="${10 + (i % 3) * 5}" fill="${C.cream}" stroke="${C.navy}" stroke-width="3" opacity="${1 - k / 1.2}"/>`;
-      }
-    }
-    const gone = Wd(9, 2);
-    let sparkle = "";
-    if (t > gone) for (let i = 0; i < 5; i++) {
-      const k = ease.back(prog(t, gone + i * 0.08, 0.3)), [sx, sy] = [[230, 380], [330, 300], [160, 520], [420, 420], [260, 600]][i];
-      sparkle += star4(sx, sy, 34 * k * (1 + 0.15 * Math.sin(t * 9 + i)), i % 2 ? C.red : C.navy);
-    }
-    const inner = `<g transform="translate(740 620) scale(1.05) rotate(${rot} 40 200)">${head(t, { gland: 1, drop: showDrip ? drip(t - S(7)) : "" })}${t >= ach ? `<g transform="translate(0 0)">${spray}</g>` : ""}</g>` + sparkle;
-    ink += panel(inner, o);
-    if (t >= ach) {
-      const k = ease.back(prog(t, ach, 0.3)), sh = Math.sin(t * 60) * 6 * Math.exp(-(t - ach) * 5);
-      over += `<g opacity="${o}" transform="translate(${540 + sh} 330) rotate(-6) scale(${k}) translate(-540 -330)">${text(540, 360, "ACHOO!", { size: 150, fill: C.red, anchor: "middle" })}</g>`;
-    }
-    over += `<g opacity="${o}">${label(t, Wd(7, 6), 130, 940, "nostril", { to: [535, 640], size: 44 })}</g>`;
-  }
-
-  // ---- H: end badge
-  o = win(t, S(10), 40);
-  if (o) {
-    let stars = "";
-    for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2 + 0.3; stars += star4(504 + Math.cos(a) * 215, 560 + Math.sin(a) * 250, 22, C.cream); }
-    ink += stamped(t, S(10) + 0.1, 504, 560, `<ellipse cx="504" cy="560" rx="300" ry="340" fill="${C.navy}"/>
-      <ellipse cx="504" cy="560" rx="280" ry="320" fill="none" stroke="${C.cream}" stroke-width="7"/>${stars}` +
-      text(504, 660, "?", { size: 300, fill: C.cream, anchor: "middle" }), { rot: -3 });
-  }
-
-  // ---- the frog, all the time
-  const ST = { x: -260, y: 1250, s: 0.85 };
-  const pose = K.hops(t, ST, [
-    { at: 0.1, x: 260, h: 240, dur: 0.65 },
-    { at: S(1) + 0.3, x: 220, h: 70, dur: 0.4 },
-    { at: S(3) + 0.05, x: 800, h: 220, dur: 0.7 },
-    { at: S(5) + 0.05, x: 250, h: 220, dur: 0.7 },
-    { at: S(7) + 0.2, x: 290, h: 60, dur: 0.4 },
-    { at: S(10), x: 504, s: 1.1, h: 240, dur: 0.7 },
-  ]);
-  const shakeK = t - Wd(2, 5);
-  if (shakeK > 0 && shakeK < 1.2) pose.rot += 12 * Math.sin(shakeK * 28) * Math.exp(-shakeK * 3);
-  let hatY = 0, hatRot = 0;
-  const hk = (t - S(9)) / 0.9;
-  if (hk > 0 && hk < 1) { hatY = -230 * 4 * hk * (1 - hk); hatRot = 360 * ease.inOut(hk); }
-  const tip = (t - Wd(10, 3)) / 0.7;
-  if (tip > 0 && tip < 1) { hatY = -45 * Math.sin(Math.PI * tip); hatRot = -14 * Math.sin(Math.PI * tip); }
-  ink += K.frog({ ...pose, mouth: MOUTH[fr] || 0, blink: K.blink(t), gaze: clamp((540 - pose.x) / 280, -1, 1), hatY, hatRot });
-
   document.getElementById("stage").innerHTML =
     `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">${K.defs(t)}
-      <g filter="url(#ink)">${ink}</g>${over}${K.captions(t, Q)}</svg>`;
+      ${K.compose(t, SHOTS, TRANS)}${K.captions(t, Q)}</svg>`;
 }
 window.renderFrame = renderFrame;
-window.ready = Promise.all([document.fonts.ready, K.loadPaper()]).then(() => renderFrame(0));
+window.ready = Promise.all([document.fonts.ready, K.loadPaper("../../brand/grain.jpg")]).then(() => renderFrame(0));
 </script>
 </body></html>

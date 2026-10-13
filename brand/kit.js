@@ -11,6 +11,7 @@ window.KIT = (() => {
   const lerp = (a, b, u) => a + (b - a) * u;
   const prog = (t, at, dur) => clamp((t - at) / dur);
   const ease = {
+    in: (u) => u * u * u,
     out: (u) => 1 - Math.pow(1 - u, 3),
     inOut: (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2),
     back: (u) => { const c = 1.9, c3 = c + 1; return 1 + c3 * Math.pow(u - 1, 3) + c * Math.pow(u - 1, 2); },
@@ -137,6 +138,122 @@ window.KIT = (() => {
     return `<path d="${d}" transform="rotate(-8 ${cx} ${cy})" fill="none" stroke="${stroke}" stroke-width="${w}" stroke-linecap="round" stroke-dasharray="${L}" stroke-dashoffset="${L * (1 - u)}"/>`;
   }
 
+
+  // ---------- camera ----------
+  // keys: [{t, x, y, s = 1, r = 0, e = "inOut"}]. (x, y) is the world point shown at the focus
+  // point on screen (540, 600 - the middle of the visual zone, above the captions).
+  function cam(t, keys) {
+    const n = (k) => ({ x: k.x, y: k.y, s: k.s ?? 1, r: k.r ?? 0 });
+    if (t <= keys[0].t) return n(keys[0]);
+    for (let i = 0; i < keys.length - 1; i++) {
+      const a = keys[i], b = keys[i + 1];
+      if (t < b.t) {
+        const u = (ease[b.e || "inOut"] || ease.inOut)((t - a.t) / (b.t - a.t)), A = n(a), B = n(b);
+        // zoom moves in log space so push-ins feel even
+        return { x: lerp(A.x, B.x, u), y: lerp(A.y, B.y, u), s: Math.exp(lerp(Math.log(A.s), Math.log(B.s), u)), r: lerp(A.r, B.r, u) };
+      }
+    }
+    return n(keys[keys.length - 1]);
+  }
+  const camT = (c, dx = 0, dy = 0, fx = 540, fy = 600) => `translate(${fx + dx} ${fy + dy}) rotate(${c.r}) scale(${c.s}) translate(${-c.x} ${-c.y})`;
+  // On-screen speed of the camera (px/frame) -> motion-blur amount.
+  function camBlur(t, keys, fps = 30) {
+    const a = cam(t - 1 / fps, keys), b = cam(t, keys);
+    const v = Math.hypot((b.x - a.x) * b.s, (b.y - a.y) * b.s) + Math.abs(Math.log(b.s / a.s)) * 900;
+    return clamp((v - 14) * 0.14, 0, 10);
+  }
+  function shake(t, at, amp = 16, decay = 6) {
+    const k = t - at;
+    if (k < 0 || k > 1.2) return { dx: 0, dy: 0 };
+    const e = amp * Math.exp(-k * decay);
+    return { dx: Math.sin(k * 71) * e, dy: Math.cos(k * 53) * e };
+  }
+  // One camera "shot": ink layer (block-print filter), crisp layer (labels in world space), screen layer (HUD type).
+  let _sid = 0;
+  function shot(t, keys, { ink = "", crisp = "", screen = "", screenInk = "", dx = 0, extraBlur = 0, shk = { dx: 0, dy: 0 } } = {}) {
+    const c = cam(t, keys), sh = shk, b = Math.max(camBlur(t, keys), extraBlur);
+    const T = camT(c, dx + sh.dx, sh.dy), id = `mb${_sid++ % 1000}`;
+    const blurDef = b > 0.5 ? `<filter id="${id}" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="${extraBlur > 0.5 ? b : b * 0.6} ${extraBlur > 0.5 ? 0 : b * 0.6}"/></filter>` : "";
+    const bf = b > 0.5 ? `filter="url(#${id})"` : "";
+    return `${blurDef}<g ${bf}><g filter="url(#ink)"><g transform="${T}">${ink}</g></g>
+      <g transform="${T}">${crisp}</g>
+      <g filter="url(#ink)" transform="translate(${dx} 0)">${screenInk}</g><g transform="translate(${dx} 0)">${screen}</g></g>`;
+  }
+
+  // ---------- transitions ----------
+  // Returns {clip, deco}: clip = screen-space shape revealing the incoming shot, deco = drawn on top.
+  function wipe(type, u, o = {}) {
+    const e = ease.inOut(clamp(u));
+    if (type === "brush") { // ink brush stroke sweeps across, new shot behind it
+      const x = lerp(-500, 1580, e), sl = 380;
+      const clip = `<polygon points="-600,0 ${x - 60},0 ${x - 60 - sl},1920 -600,1920"/>`;
+      const band = `<polygon points="${x - 90},0 ${x + 150},0 ${x + 150 - sl},1920 ${x - 90 - sl},1920" fill="${o.color || C.navy}"/>`;
+      return { clip, deco: `<g filter="url(#ink)">${band}</g>` };
+    }
+    if (type === "iris") { // circle opens from a point, red ring on the edge
+      const r = 2300 * Math.pow(e, 1.4), cx = o.cx ?? 540, cy = o.cy ?? 700;
+      return { clip: `<circle cx="${cx}" cy="${cy}" r="${r}"/>`, deco: `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${C.red}" stroke-width="18"/>` };
+    }
+    if (type === "tear") { // torn paper edge rises from the bottom
+      const y = lerp(2050, -160, e);
+      let pts = "", edge = "";
+      for (let x = -40, i = 0; x <= 1120; x += 40, i++) {
+        const j = y + (((i * 37) % 23) - 11) * 2.2 + Math.sin(i * 1.3) * 10;
+        pts += `${x},${j} `; edge += `${x},${j - 14 - ((i * 13) % 9)} `;
+      }
+      const clip = `<polygon points="${pts} 1120,2100 -40,2100"/>`;
+      const deco = `<polyline points="${edge}" fill="none" stroke="${C.cream}" stroke-width="22"/><polyline points="${pts}" fill="none" stroke="${C.navy}" stroke-width="3" opacity=".35"/>`;
+      return { clip, deco };
+    }
+    return { clip: `<rect width="1080" height="1920"/>`, deco: "" };
+  }
+  // Compose shots + transitions for time t.
+  // shots: [{a, b, draw(t, dx, extraBlur) -> svg}], trans[i] sits between shots i and i+1: {type, dur, ...opts}
+  function compose(t, shots, trans) {
+    let out = "";
+    for (let i = 0; i < shots.length; i++) {
+      const S = shots[i], tin = trans[i - 1], tout = trans[i];
+      const a0 = S.a - (tin ? tin.dur / 2 : 0), b1 = S.b + (tout ? tout.dur / 2 : 0);
+      if (t < a0 || t >= b1) continue;
+      // entering through a transition?
+      if (tin && t < S.a + tin.dur / 2) {
+        const u = (t - a0) / tin.dur;
+        if (tin.type === "push") { const e = ease.inOut(u); out += S.draw(t, 1080 * (1 - e) * (tin.dir || 1), 40 * Math.sin(Math.PI * u)); continue; }
+        if (tin.type === "cut") { if (t >= S.a) out += S.draw(t, 0, 0); continue; }
+        const w = wipe(tin.type, u, tin), id = `wc${i}`;
+        out += `<clipPath id="${id}">${w.clip}</clipPath><g clip-path="url(#${id})">${S.draw(t, 0, 0)}</g>${w.deco}`;
+        continue;
+      }
+      if (tout && t >= S.b - tout.dur / 2) {
+        const u = (t - (S.b - tout.dur / 2)) / tout.dur;
+        if (tout.type === "push") { out += S.draw(t, -1080 * ease.inOut(u) * (tout.dir || 1), 40 * Math.sin(Math.PI * u)); continue; }
+        if (tout.type === "cut" && t >= S.b) continue;
+      }
+      out += S.draw(t, 0, 0);
+    }
+    return out;
+  }
+
+  // ---------- kinetic type ----------
+  // Typewriter: reveals characters at cps from `at`, with a blinking cursor while typing.
+  function typeOn(t, at, x, y, str, opts = {}) {
+    if (t < at) return "";
+    const n = Math.min(str.length, Math.floor((t - at) * (opts.cps || 18)));
+    const cursor = n < str.length && Math.floor(t * 4) % 2 === 0 ? "|" : "";
+    return text(x, y, str.slice(0, n) + cursor, opts);
+  }
+  // Outline text that draws its strokes on, then fills in.
+  function drawText(t, at, x, y, str, { size = 160, color = C.navy, dur = 0.8, anchor = "middle", sw = 4 } = {}) {
+    if (t < at) return "";
+    const u = prog(t, at, dur), f = prog(t, at + dur * 0.7, 0.3);
+    return `<text x="${x}" y="${y}" font-family="${FONT}" font-size="${size}" font-weight="700" text-anchor="${anchor}" fill="${color}" fill-opacity="${f}" stroke="${color}" stroke-width="${sw}" stroke-dasharray="900" stroke-dashoffset="${900 * (1 - ease.out(u))}">${esc(str)}</text>`;
+  }
+  // Highlighter swipe behind a box (draw before the text).
+  function highlight(t, at, x, y, w, h, { color = C.red, dur = 0.25, rot = -1.5 } = {}) {
+    if (t < at) return "";
+    return `<rect x="${x}" y="${y}" width="${w * ease.out(prog(t, at, dur))}" height="${h}" fill="${color}" transform="rotate(${rot} ${x} ${y + h / 2})"/>`;
+  }
+
   // ---------- captions ----------
   let _ctx;
   const measure = (s, size) => {
@@ -145,7 +262,7 @@ window.KIT = (() => {
     return _ctx.measureText(s).width;
   };
   // Word-by-word captions synced to the babble voice (cues.json from babble-audio).
-  function captions(t, cues, { cx = 500, top = 1330, maxW = 800, size = 66, lh = 82 } = {}) {
+  function captions(t, cues, { cx = 500, top = 1330, maxW = 800, size = 66, lh = 86, bg = C.paper } = {}) {
     let idx = -1;
     for (let i = 0; i < cues.length; i++) if (t >= cues[i].start - 0.05) idx = i;
     if (idx < 0) return "";
@@ -165,6 +282,10 @@ window.KIT = (() => {
       const lw = ln.reduce((a, w) => a + w.width, 0) + sp * (ln.length - 1);
       let x = cx - lw / 2;
       const y = top + size + li * lh;
+      // backing box grows with the words that are already showing
+      let shown = -sp;
+      for (const w of ln) if (t >= w.at - 0.02) shown += sp + w.width;
+      if (shown > 0 && bg) out += `<rect x="${x - 22}" y="${y - size * 0.92}" width="${shown + 44}" height="${size * 1.28}" fill="${bg}"/>`;
       for (const w of ln) {
         const u = prog(t, w.at - 0.02, 0.1);
         if (u > 0) {
@@ -181,5 +302,5 @@ window.KIT = (() => {
     return out;
   }
 
-  return { C, FONT, W, H, clamp, lerp, prog, ease, esc, stamp, stamped, defs, loadPaper, frog, blink, hops, text, label, circleCallout, captions };
+  return { C, FONT, W, H, clamp, lerp, prog, ease, esc, stamp, stamped, defs, loadPaper, frog, blink, hops, text, label, circleCallout, captions, cam, camT, camBlur, shake, shot, wipe, compose, typeOn, drawText, highlight };
 })();
