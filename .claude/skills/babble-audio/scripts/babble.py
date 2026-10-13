@@ -9,7 +9,7 @@ pauses. The speech is intentionally unintelligible - the rhythm follows the
 subtitles exactly, so captions on screen carry the meaning.
 Only needs numpy + the standard library.
 """
-import argparse, json, random, wave
+import argparse, json, wave
 from pathlib import Path
 import numpy as np
 
@@ -20,22 +20,32 @@ LETTER_VOWEL = {c: v for v, cs in {"a": "ahjkqr", "e": "bcdeglptvz", "i": "fimns
 NOTE = lambda n: 440.0 * 2 ** ((n - 69) / 12)
 
 
-def blip(f0, vowel, dur, rng):
+# The channel mascot voice. Fixed values = the same character in every video.
+# Change these only on purpose (and note it in content/BRAND.md).
+VOICES = {
+    # name: base pitch Hz, formant shift (>1 = smaller/cuter), seconds per letter, chirp (start pitch boost)
+    "cute": dict(pitch=560, formant=1.35, rate=0.058, chirp=0.35),
+    "cute-low": dict(pitch=440, formant=1.25, rate=0.062, chirp=0.25),
+    "tiny": dict(pitch=680, formant=1.45, rate=0.052, chirp=0.4),
+}
+# fixed melody per letter (semitones) - the same word always "sounds" the same
+LETTER_SEMI = {c: [0, 3, 5, 2, 7, 4, 0, 5, 3, 7, 2, 4, 0][i % 13] - 3 for i, c in enumerate("aeioubcdfghjklmnpqrstvwxyz")}
+
+
+def blip(f0, vowel, dur, v):
+    """One cute syllable: a quick downward pitch chirp into a bright, small-mouthed vowel."""
     t = np.arange(int(dur * SR)) / SR
-    f = f0 * (1 + 0.04 * np.sin(2 * np.pi * 6 * t)) * (1 + rng.uniform(-0.03, 0.03))
+    f = f0 * (1 + v["chirp"] * np.exp(-t / 0.012)) * (1 + 0.02 * np.sin(2 * np.pi * 9 * t))
     phase = 2 * np.pi * np.cumsum(f) / SR
-    f1, f2 = VOWELS[vowel]
+    f1, f2 = (x * v["formant"] for x in VOWELS[vowel])
     out = np.zeros_like(t)
-    for h in range(1, 24):  # additive harmonics shaped by two formant peaks
+    for h in range(1, 16):
         fh = f0 * h
         if fh > SR / 2.2:
             break
-        amp = (np.exp(-((fh - f1) / 180) ** 2) + 0.6 * np.exp(-((fh - f2) / 260) ** 2) + 0.05) / h ** 0.6
+        amp = (np.exp(-((fh - f1) / 260) ** 2) + 0.7 * np.exp(-((fh - f2) / 380) ** 2) + 0.08) / h ** 0.9
         out += amp * np.sin(h * phase)
-    a = int(0.006 * SR)
-    env = np.ones_like(t)
-    env[:a] = np.linspace(0, 1, a)
-    env *= np.exp(-3.5 * t / dur)
+    env = np.minimum(1, t / 0.004) * np.exp(-2.2 * t / dur) * np.minimum(1, (dur - t) / 0.008)
     return out * env
 
 
@@ -53,26 +63,30 @@ def timeline(cues, total, gap):
     return out
 
 
-def voice(cues, total, pitch, rng):
+def voice(cues, total, v):
+    """Letters are spoken at the character's fixed speed from the start of each cue,
+    like Animal Crossing: quick burst, then the caption stays up in silence."""
     buf = np.zeros(int(total * SR) + SR)
     for cue in cues:
-        text = cue["text"]
-        units = sum(1 if ch.isalpha() else 2 if ch in ",;:" else 3 if ch in ".!?" else 0.6 for ch in text) or 1
-        step = (cue["end"] - cue["start"]) / units
-        t = cue["start"]
-        question = text.rstrip().endswith("?")
-        for ch in text.lower():
+        text = cue["text"].lower()
+        units = sum(1 if ch.isalpha() else 2.5 if ch in ",;:.!?" else 0.5 for ch in text) or 1
+        step = min(v["rate"], (cue["end"] - cue["start"]) * 0.95 / units)  # squeeze only if needed
+        t, n = cue["start"], 0
+        question, excited = text.rstrip().endswith("?"), text.rstrip().endswith("!")
+        for ch in text:
             if ch.isalpha():
-                semis = (ord(ch) - 97) % 5 - 2 + rng.choice([0, 0, 1, -1])
-                f0 = pitch * 2 ** (semis / 12)
-                if question:  # rise toward the end of a question
-                    f0 *= 1 + 0.25 * (t - cue["start"]) / max(cue["end"] - cue["start"], 1e-3)
-                b = blip(f0, LETTER_VOWEL.get(ch, "a"), min(step * 0.85, 0.09), rng)
+                f0 = v["pitch"] * 2 ** (LETTER_SEMI.get(ch, 0) / 12)
+                if question:
+                    f0 *= 1 + 0.03 * n  # rising, curious
+                elif excited:
+                    f0 *= 1.12
+                b = blip(f0, LETTER_VOWEL.get(ch, "a"), step * 0.9, v)
                 s = int(t * SR)
                 buf[s:s + len(b)] += b
                 t += step
+                n += 1
             else:
-                t += step * (2 if ch in ",;:" else 3 if ch in ".!?" else 0.6)
+                t += step * (2.5 if ch in ",;:.!?" else 0.5)
     return buf[: int(total * SR)]
 
 
@@ -133,7 +147,7 @@ def main():
     p.add_argument("script", help="text file, one subtitle cue per line")
     p.add_argument("--out", default=".")
     p.add_argument("--duration", type=float, default=30.0)
-    p.add_argument("--pitch", type=float, default=330.0, help="voice base pitch Hz (220 deep, 400 squeaky)")
+    p.add_argument("--voice", default="cute", choices=sorted(VOICES), help="channel character voice (keep the same for every video)")
     p.add_argument("--bpm", type=float, default=100.0)
     p.add_argument("--key", type=int, default=0, help="semitones above C")
     p.add_argument("--gap", type=float, default=0.25, help="silence between cues (s)")
@@ -141,12 +155,11 @@ def main():
     p.add_argument("--seed", type=int, default=7)
     a = p.parse_args()
 
-    rng = random.Random(a.seed)
     lines = [l.strip() for l in Path(a.script).read_text().splitlines() if l.strip()]
     cues = timeline(lines, a.duration, a.gap)
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
 
-    v = norm(voice(cues, a.duration, a.pitch, rng), 0.9)
+    v = norm(voice(cues, a.duration, VOICES[a.voice]), 0.9)
     m = norm(music(a.duration, a.bpm, a.key, np.random.default_rng(a.seed)), 0.9)
     # duck music while the voice talks
     env = np.convolve(np.abs(v), np.ones(4410) / 4410, mode="same")

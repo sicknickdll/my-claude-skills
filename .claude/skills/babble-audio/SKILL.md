@@ -9,7 +9,7 @@ description: Generates the soundtrack for an explainer video - an unintelligible
 
 | File | What |
 |---|---|
-| `voice.wav` | babble voice: each letter = a pitched vowel blip, spaces/punctuation = pauses, questions rise in pitch |
+| `voice.wav` | cute babble voice: each letter = a chirpy vowel blip at a fixed fast pace from the start of each cue, punctuation = pauses, questions rise, `!` lifts pitch |
 | `music.wav` | I–V–vi–IV loop: bass, pad, plucky arpeggio, soft thump; fades out |
 | `mix.wav` | voice + music, music ducked under speech — **use this in the video** |
 | `subtitles.srt`, `cues.json` | exact timing of every cue; the video's captions **must** use these |
@@ -19,13 +19,13 @@ description: Generates the soundtrack for an explainer video - an unintelligible
 2. Run:
    ```
    python3 .claude/skills/babble-audio/scripts/babble.py content/<slug>/audio/script.txt \
-     --out content/<slug>/audio --duration 30 --pitch 330 --bpm 100 --key 0
+     --out content/<slug>/audio --duration 30 --voice cute --bpm 100 --key 0
    ```
 3. Check `cues.json`: every cue should be on screen ≥0.8s and ≤3.5s. If cues are too slow, the script is too short for the duration; if too fast, cut words (ask the researcher) — don't speed past readability.
 4. Report the files and settings used.
 
 ## Knobs (keep them in `content/BRAND.md` so the channel sounds consistent)
-- `--pitch` voice character: 220 deep/calm, 330 default, 420 squeaky. Different characters = different pitches.
+- `--voice` **the channel mascot — always `cute` unless the user changes it.** Presets are fixed in `VOICES` at the top of `babble.py` (pitch ~560 Hz, small-mouth formants, chirpy syllable attack, fast Animal Crossing pace). Each letter has a fixed melody, so output is fully deterministic: the same line sounds identical in every video. `cute-low` and `tiny` exist for an occasional second character. Never tweak the preset per video.
 - `--bpm`, `--key` music tempo/key; `--music-level` (default 0.35); `--gap` pause between cues; `--seed` variation.
 - Mood: bright = major key, 100–115 bpm; mysterious/history = lower pitch and bpm 80–90.
 
