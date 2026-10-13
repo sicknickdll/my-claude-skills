@@ -27,6 +27,6 @@ description: Generates the soundtrack for an explainer video - an unintelligible
 ## Knobs (keep them in `content/BRAND.md` so the channel sounds consistent)
 - `--voice` **the channel mascot — always `cute` unless the user changes it.** Presets are fixed in `VOICES` at the top of `babble.py` (pitch ~560 Hz, small-mouth formants, chirpy syllable attack, fast Animal Crossing pace). Each letter has a fixed melody, so output is fully deterministic: the same line sounds identical in every video. `cute-low` and `tiny` exist for an occasional second character. Never tweak the preset per video.
 - `--bpm`, `--key` music tempo/key; `--music-level` (default 0.35); `--gap` pause between cues; `--seed` variation.
-- Mood: bright = major key, 100–115 bpm; mysterious/history = lower pitch and bpm 80–90.
+- Mood: bright = major key, 100–115 bpm; mysterious/history = minor-feel key and bpm 80–90 (voice stays `cute`).
 
 If the user supplies their own music track, use only `voice.wav` and mix with ffmpeg (`amix`, music at ~-18 dB, `sidechaincompress` for ducking).

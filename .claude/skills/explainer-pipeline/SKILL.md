@@ -22,4 +22,4 @@ Four subagents, one folder per video: `content/<slug>/`.
 5. Run `motion-explainer`; it will ask for storyboard approval per its skill.
 6. Finish with: video path, captions for both platforms, hashtags, posting time.
 
-First time only: ask `social-media-manager` for account setup + `content/CALENDAR.md`, and settle `content/BRAND.md` (palette, fonts, intro/outro) with `motion-explainer` and `audio-designer` (voice pitch, bpm, key).
+First time only: ask `social-media-manager` for account setup + `content/CALENDAR.md`, and settle `content/BRAND.md` (palette, fonts, intro/outro) with `motion-explainer` and `audio-designer` (voice preset `cute`, bpm, key).
