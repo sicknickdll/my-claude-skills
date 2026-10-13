@@ -1,0 +1,4 @@
+# rendered outputs (large; share the MP4 directly)
+content/*/render/
+content/*/build/
+content/*/audio/*.wav

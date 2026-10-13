@@ -1,0 +1,226 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Penguins drink seawater</title>
+<style>html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#EFE6D3 url(../../brand/paper.jpg) 0 0/1080px 1920px}</style>
+</head><body>
+<div id="stage"></div>
+<script src="../../brand/kit.js"></script>
+<script src="build/data.js"></script>
+<script>
+const K = KIT, { C, clamp, lerp, prog, ease, stamped, label, circleCallout, text } = K;
+const Q = window.CUES, MOUTH = window.MOUTH, FPS = 30;
+const S = (i) => Q[i].start, Wd = (i, w) => Q[i].words[w];
+
+// ---------- episode drawings ----------
+function penguin(x, y, s, rot = 0) { // full body, front view, feet at origin, ~420 tall
+  return `<g transform="translate(${x} ${y}) rotate(${rot}) scale(${s})">
+    <ellipse cx="-36" cy="-4" rx="34" ry="12" fill="${C.red}"/><ellipse cx="36" cy="-4" rx="34" ry="12" fill="${C.red}"/>
+    <path d="M-84,-262 C-140,-200 -152,-120 -132,-88 C-114,-140 -100,-196 -78,-226 Z" fill="${C.navy}"/>
+    <path d="M84,-262 C140,-200 152,-120 132,-88 C114,-140 100,-196 78,-226 Z" fill="${C.navy}"/>
+    <path d="M0,-420 C60,-420 86,-372 86,-320 C86,-262 120,-180 110,-92 C100,-22 60,-6 0,-6 C-60,-6 -100,-22 -110,-92 C-120,-180 -86,-262 -86,-320 C-86,-372 -60,-420 0,-420 Z" fill="${C.navy}"/>
+    <path d="M0,-300 C52,-300 74,-230 76,-150 C78,-70 50,-26 0,-26 C-50,-26 -78,-70 -76,-150 C-74,-230 -52,-300 0,-300 Z" fill="${C.cream}"/>
+    <circle cx="-30" cy="-352" r="13" fill="none" stroke="${C.cream}" stroke-width="6"/><circle cx="30" cy="-352" r="13" fill="none" stroke="${C.cream}" stroke-width="6"/>
+    <circle cx="-30" cy="-352" r="5" fill="${C.cream}"/><circle cx="30" cy="-352" r="5" fill="${C.cream}"/>
+    <path d="M-16,-330 L16,-330 L0,-296 Z" fill="${C.red}"/>
+  </g>`;
+}
+
+function waves(t, y0, rows = 3) {
+  let p = "";
+  for (let r = 0; r < rows; r++) {
+    const y = y0 + r * 52, off = ((t * 45 * (r % 2 ? 1 : -1)) % 120 + 120) % 120 - 120;
+    let d = `M${off - 120},${y}`;
+    for (let x = off - 120; x < 1200; x += 120) d += ` q30,-34 60,0 q30,34 60,0`;
+    p += `<path d="${d}" fill="none" stroke="${C.navy}" stroke-width="13" stroke-linecap="round"/>`;
+  }
+  return p;
+}
+
+// Big penguin head in profile, facing left. Origin ~ centre of head.
+function head(t, { gland = 0, drop = null, nostril = true } = {}) {
+  let s = `<path d="M-150,60 C-200,260 -190,460 -170,760 L380,760 C340,420 300,180 200,30 Z" fill="${C.navy}"/>
+    <path d="M-150,130 C-196,280 -188,460 -170,760 L-10,760 C-40,520 -60,300 -50,170 Z" fill="${C.cream}"/>
+    <circle cx="40" cy="-40" r="232" fill="${C.navy}"/>
+    <path d="M-150,-30 L-440,36 L-150,86 Z" fill="${C.navy}"/>
+    <path d="M-162,30 L-428,38" stroke="${C.cream}" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="-60" cy="-58" r="30" fill="${C.navy}" stroke="${C.cream}" stroke-width="13"/>
+    <circle cx="-68" cy="-66" r="6" fill="${C.cream}"/>`;
+  if (nostril) s += `<ellipse cx="-206" cy="6" rx="18" ry="5" transform="rotate(12 -206 6)" fill="${C.cream}"/>`;
+  if (gland > 0) s += `<g transform="translate(-40 -152) rotate(-12) scale(${gland})"><ellipse rx="74" ry="30" fill="${C.red}"/><ellipse cx="-20" cy="-6" rx="22" ry="7" fill="${C.cream}" opacity=".55"/></g>`;
+  if (drop) s += drop;
+  return s;
+}
+
+function panel(inner, o = 1) { // Vox-style framed card in the visual zone
+  return `<g opacity="${o}"><clipPath id="pc"><rect x="70" y="200" width="940" height="790" rx="6"/></clipPath>
+    <rect x="70" y="200" width="940" height="790" rx="6" fill="${C.paper}"/>
+    <g clip-path="url(#pc)">${inner}</g>
+    <rect x="70" y="200" width="940" height="790" rx="6" fill="none" stroke="${C.navy}" stroke-width="9"/></g>`;
+}
+
+function drip(t) { // salty drop: forms at the nostril, slides down the beak, falls off the tip
+  const p = (t % 1.5) / 1.5;
+  let x, y, r;
+  if (p < 0.2) { x = -206; y = 12; r = 14 * (p / 0.2); }
+  else if (p < 0.7) { const u = ease.inOut((p - 0.2) / 0.5); x = lerp(-206, -425, u); y = lerp(14, 50, u); r = 14; }
+  else { const u = (p - 0.7) / 0.3; x = -425 - 10 * u; y = 50 + 520 * u * u; r = 14; }
+  return `<path transform="translate(${x} ${y}) scale(${r / 14})" d="M0,-24 C8,-10 14,-2 14,8 A14,14 0 1,1 -14,8 C-14,-2 -8,-10 0,-24 Z" fill="${C.cream}" stroke="${C.navy}" stroke-width="4"/>`;
+}
+
+function star4(x, y, r, fill) {
+  return `<path transform="translate(${x} ${y})" d="M0,${-r} Q${r * .18},${-r * .18} ${r},0 Q${r * .18},${r * .18} 0,${r} Q${-r * .18},${r * .18} ${-r},0 Q${-r * .18},${-r * .18} 0,${-r} Z" fill="${fill}"/>`;
+}
+
+// scene window: visible from a to b, with 0.2 s fade overlap
+const win = (t, a, b) => (t < a || t > b + 0.2) ? 0 : Math.min(clamp((t - a) / 0.15), clamp((b + 0.2 - t) / 0.2));
+
+function renderFrame(t) {
+  const fr = Math.min(MOUTH.length - 1, Math.round(t * FPS));
+  let ink = "", over = ""; // ink = block-print layer (filtered); over = crisp labels/type
+
+  // ---- A: title "Did you know?"
+  let o = win(t, 0, S(1));
+  if (o) {
+    ink += `<g opacity="${o}">` +
+      stamped(t, 0.15, 470, 600, text(150, 640, "Did you", { size: 170 }), { rot: -2 }) +
+      stamped(t, 0.45, 470, 790, text(150, 820, "know?", { size: 220 }), { rot: -2 }) +
+      stamped(t, 0.8, 820, 420, `<rect x="760" y="360" width="124" height="124" rx="6" fill="${C.red}"/>` + text(822, 462, "?", { size: 110, fill: C.cream, anchor: "middle" }), { rot: 8 }) +
+      (t > 0.9 ? `<rect x="150" y="852" width="${560 * ease.out(prog(t, 0.9, 0.3))}" height="20" fill="${C.red}"/>` : "") + `</g>`;
+  }
+
+  // ---- B: penguin on the waves
+  o = win(t, S(1), S(2));
+  if (o) {
+    const u = t - S(1), dip = Math.sin(Math.PI * clamp((u - 0.9) / 1.2)) * -22;
+    const rise = 60 * (1 - ease.out(prog(u, 0, 0.5)));
+    ink += `<g opacity="${o}"><g transform="translate(0 ${rise})">${waves(t, 905)}</g>
+      <path d="M380,890 L760,890 L730,940 L410,940 Z" fill="${C.cream}" stroke="${C.navy}" stroke-width="9"/>
+      ${stamped(t, S(1) + 0.15, 570, 700, penguin(570, 892, 1, dip))}</g>`;
+    over += `<g opacity="${o}">${label(t, Wd(1, 3), 120, 300, "seawater", { to: [250, 905], size: 44 })}</g>`;
+  }
+
+  // ---- C: glass of seawater + red X
+  o = win(t, S(2), S(3));
+  if (o) {
+    const u = t - S(2), X = Wd(2, 5);
+    let salt = "";
+    for (let i = 0; i < 9; i++) {
+      const a = 0.25 + i * 0.12, k = clamp((u - a) / 0.6), sx = 450 + (i * 71) % 180;
+      if (u > a) salt += `<rect x="${sx}" y="${lerp(330, 700 + (i % 3) * 70, ease.inOut(k))}" width="22" height="22" transform="rotate(${i * 23} ${sx + 11} ${lerp(341, 711, k)})" fill="${C.cream}" stroke="${C.navy}" stroke-width="3"/>`;
+    }
+    const wv = `M412,650 q34,-22 68,0 q34,22 68,0 q34,-22 68,0 q34,22 68,0 L655,940 L425,940 Z`;
+    ink += `<g opacity="${o}">${stamped(t, S(2) + 0.05, 540, 750,
+      `<path d="${wv}" fill="${C.navy}"/>${salt}<path d="M390,560 L690,560 L655,950 L425,950 Z" fill="none" stroke="${C.navy}" stroke-width="12" stroke-linejoin="round"/>`)}
+      ${stamped(t, X, 540, 750, `<path d="M400,580 L680,930 M680,580 L400,930" stroke="${C.red}" stroke-width="40" stroke-linecap="round"/>`, { rot: 4 })}</g>`;
+    over += `<g opacity="${o}">${label(t, S(2) + 0.6, 540, 470, "≈ 3.5 % salt", { anchor: "middle", fill: C.navy, size: 50 })}</g>`;
+  }
+
+  // ---- D: head profile, salt gland callout
+  o = win(t, S(3), S(5));
+  if (o) {
+    const u = t - S(3), sc = lerp(0.75, 1, ease.out(prog(u, 0, 0.5)));
+    const g = t < Wd(3, 3) ? 0 : ease.back(prog(t, Wd(3, 3), 0.35));
+    ink += panel(`<g transform="translate(620 ${640}) scale(${sc})">${head(t, { gland: g })}</g>` +
+      circleCallout(t, Wd(3, 3) + 0.15, 580, 488, 120, 66) +
+      (t > Wd(4, 3) ? `<path d="M520,560 Q470,600 520,640" fill="none" stroke="${C.red}" stroke-width="8" stroke-linecap="round" stroke-dasharray="200" stroke-dashoffset="${200 * (1 - ease.out(prog(t, Wd(4, 3), 0.35)))}"/>` : ""), o);
+    over += `<g opacity="${o}">${label(t, Wd(3, 3) + 0.3, 130, 300, "salt gland", { to: [500, 450], size: 44 })}
+      ${label(t, Wd(4, 3), 120, 820, "eye", { to: [540, 600], size: 44 })}</g>`;
+  }
+
+  // ---- E: blood-vessel diagram
+  o = win(t, S(5), S(7));
+  if (o) {
+    const u = t - S(5);
+    let cells = "", salt = "";
+    for (let i = 0; i < 18; i++) {
+      const x = 40 + ((i * 113 + u * 190) % 1000), yy = 560 + ((i * 37) % 60);
+      cells += `<circle cx="${x}" cy="${yy}" r="15" fill="${C.red}"/>`;
+    }
+    for (let i = 0; i < 9; i++) {
+      const p = ((i / 9) + u * 0.22) % 1;
+      let x, y;
+      if (p < 0.55) { x = lerp(40, 520, p / 0.55); y = 580 + ((i * 29) % 40) - 10; }
+      else { const k = ease.inOut((p - 0.55) / 0.45); x = lerp(520, 540, k); y = lerp(580, 330, k); }
+      if (!(p > 0.97)) salt += `<rect x="${x - 12}" y="${y - 12}" width="24" height="24" transform="rotate(${i * 31 + u * 40} ${x} ${y})" fill="${C.navy}"/>`;
+    }
+    const drop = 30 + 26 * clamp(u / 5);
+    ink += panel(`<g transform="translate(0 90)"><path d="M0,520 L1080,520 M0,640 L1080,640" stroke="${C.red}" stroke-width="12"/>
+      <rect x="0" y="526" width="1080" height="108" fill="${C.cream}" opacity=".6"/>
+      ${cells}
+      <ellipse cx="540" cy="470" rx="150" ry="70" fill="${C.red}"/>
+      ${salt}
+      <path transform="translate(540 300) scale(${drop / 30})" d="M0,-44 C14,-20 30,-4 30,14 A30,30 0 1,1 -30,14 C-30,-4 -14,-20 0,-44 Z" fill="${C.cream}" stroke="${C.navy}" stroke-width="6"/>
+      ${stamped(t, Wd(6, 4), 540, 470, `<rect x="440" y="440" width="200" height="62" fill="${C.navy}"/>` + text(540, 486, "FILTER", { size: 40, fill: C.cream, anchor: "middle" }), { rot: -3 })}</g>`, o);
+    over += `<g opacity="${o}" transform="translate(0 90)">${label(t, S(5) + 0.3, 110, 740, "salty blood", { size: 38 })}
+      ${label(t, S(5) + 0.9, 960, 740, "clean blood", { size: 38, anchor: "end" })}
+      ${label(t, Wd(5, 2), 610, 290, "salt out", { size: 38, fill: C.navy })}</g>`;
+  }
+
+  // ---- F + G: drip, wind-up, ACHOO
+  o = win(t, S(7), S(10));
+  if (o) {
+    const ach = S(9), wind = Wd(8, 2);
+    let rot = 0;
+    if (t > wind && t < ach) rot = 9 * ease.inOut(prog(t, wind, ach - wind));       // ah... ah...
+    if (t >= ach) { const k = t - ach; rot = 9 - 24 * ease.out(clamp(k / 0.12)) + 15 * clamp((k - 0.12) / 0.5) + Math.sin(k * 40) * 3 * Math.exp(-k * 6); }
+    const showDrip = t < ach;
+    let spray = "";
+    if (t >= ach && t < ach + 1.2) {
+      const k = t - ach;
+      for (let i = 0; i < 14; i++) {
+        const a = Math.PI * (0.85 + (i / 14) * 0.5), v = 500 + (i * 97) % 350;
+        const x = -430 + Math.cos(a) * v * k, y = 40 + Math.sin(a) * v * k * -0.6 + 600 * k * k;
+        spray += `<circle cx="${x}" cy="${y}" r="${10 + (i % 3) * 5}" fill="${C.cream}" stroke="${C.navy}" stroke-width="3" opacity="${1 - k / 1.2}"/>`;
+      }
+    }
+    const gone = Wd(9, 2);
+    let sparkle = "";
+    if (t > gone) for (let i = 0; i < 5; i++) {
+      const k = ease.back(prog(t, gone + i * 0.08, 0.3)), [sx, sy] = [[230, 380], [330, 300], [160, 520], [420, 420], [260, 600]][i];
+      sparkle += star4(sx, sy, 34 * k * (1 + 0.15 * Math.sin(t * 9 + i)), i % 2 ? C.red : C.navy);
+    }
+    const inner = `<g transform="translate(740 620) scale(1.05) rotate(${rot} 40 200)">${head(t, { gland: 1, drop: showDrip ? drip(t - S(7)) : "" })}${t >= ach ? `<g transform="translate(0 0)">${spray}</g>` : ""}</g>` + sparkle;
+    ink += panel(inner, o);
+    if (t >= ach) {
+      const k = ease.back(prog(t, ach, 0.3)), sh = Math.sin(t * 60) * 6 * Math.exp(-(t - ach) * 5);
+      over += `<g opacity="${o}" transform="translate(${540 + sh} 330) rotate(-6) scale(${k}) translate(-540 -330)">${text(540, 360, "ACHOO!", { size: 150, fill: C.red, anchor: "middle" })}</g>`;
+    }
+    over += `<g opacity="${o}">${label(t, Wd(7, 6), 130, 940, "nostril", { to: [535, 640], size: 44 })}</g>`;
+  }
+
+  // ---- H: end badge
+  o = win(t, S(10), 40);
+  if (o) {
+    let stars = "";
+    for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2 + 0.3; stars += star4(504 + Math.cos(a) * 215, 560 + Math.sin(a) * 250, 22, C.cream); }
+    ink += stamped(t, S(10) + 0.1, 504, 560, `<ellipse cx="504" cy="560" rx="300" ry="340" fill="${C.navy}"/>
+      <ellipse cx="504" cy="560" rx="280" ry="320" fill="none" stroke="${C.cream}" stroke-width="7"/>${stars}` +
+      text(504, 660, "?", { size: 300, fill: C.cream, anchor: "middle" }), { rot: -3 });
+  }
+
+  // ---- the frog, all the time
+  const ST = { x: -260, y: 1250, s: 0.85 };
+  const pose = K.hops(t, ST, [
+    { at: 0.1, x: 260, h: 240, dur: 0.65 },
+    { at: S(1) + 0.3, x: 220, h: 70, dur: 0.4 },
+    { at: S(3) + 0.05, x: 800, h: 220, dur: 0.7 },
+    { at: S(5) + 0.05, x: 250, h: 220, dur: 0.7 },
+    { at: S(7) + 0.2, x: 290, h: 60, dur: 0.4 },
+    { at: S(10), x: 504, s: 1.1, h: 240, dur: 0.7 },
+  ]);
+  const shakeK = t - Wd(2, 5);
+  if (shakeK > 0 && shakeK < 1.2) pose.rot += 12 * Math.sin(shakeK * 28) * Math.exp(-shakeK * 3);
+  let hatY = 0, hatRot = 0;
+  const hk = (t - S(9)) / 0.9;
+  if (hk > 0 && hk < 1) { hatY = -230 * 4 * hk * (1 - hk); hatRot = 360 * ease.inOut(hk); }
+  const tip = (t - Wd(10, 3)) / 0.7;
+  if (tip > 0 && tip < 1) { hatY = -45 * Math.sin(Math.PI * tip); hatRot = -14 * Math.sin(Math.PI * tip); }
+  ink += K.frog({ ...pose, mouth: MOUTH[fr] || 0, blink: K.blink(t), gaze: clamp((540 - pose.x) / 280, -1, 1), hatY, hatRot });
+
+  document.getElementById("stage").innerHTML =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">${K.defs(t)}
+      <g filter="url(#ink)">${ink}</g>${over}${K.captions(t, Q)}</svg>`;
+}
+window.renderFrame = renderFrame;
+window.ready = Promise.all([document.fonts.ready, K.loadPaper()]).then(() => renderFrame(0));
+</script>
+</body></html>

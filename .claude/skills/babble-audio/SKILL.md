@@ -12,10 +12,10 @@ description: Generates the soundtrack for an explainer video - an unintelligible
 | `voice.wav` | cute babble voice: each letter = a chirpy vowel blip at a fixed fast pace from the start of each cue, punctuation = pauses, questions rise, `!` lifts pitch |
 | `music.wav` | I–V–vi–IV loop: bass, pad, plucky arpeggio, soft thump; fades out |
 | `mix.wav` | voice + music, music ducked under speech — **use this in the video** |
-| `subtitles.srt`, `cues.json` | exact timing of every cue; the video's captions **must** use these |
+| `subtitles.srt`, `cues.json` | exact timing of every cue and of every word (`words`); the video's captions **must** use these |
 
 ## Steps
-1. Turn the script into `content/<slug>/audio/script.txt`: **one subtitle cue per line, 2–6 words**, split on natural breath points. Keep punctuation (it creates pauses).
+1. Turn the script into `content/<slug>/audio/script.txt`: **one subtitle cue per line, 2–6 words**, split on natural breath points, first line "Did you know?". Keep punctuation (it creates pauses). `*word*` highlights a word in the captions and isn't spoken.
 2. Run:
    ```
    python3 .claude/skills/babble-audio/scripts/babble.py content/<slug>/audio/script.txt \

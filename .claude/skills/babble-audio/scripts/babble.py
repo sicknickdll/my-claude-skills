@@ -2,6 +2,7 @@
 """Animal Crossing-style "babble" voice + procedural music, timed to subtitles.
 
 Input: a text file, one subtitle cue per line (keep cues short, <= ~6 words).
+Wrap a word in *asterisks* to highlight it in the captions (it is not spoken).
 Outputs into --out: voice.wav, music.wav, mix.wav, subtitles.srt, cues.json
 
 Every letter becomes a short pitched vowel blip; spaces and punctuation are
@@ -51,7 +52,7 @@ def blip(f0, vowel, dur, v):
 
 def timeline(cues, total, gap):
     """Spread cues over `total` seconds proportional to character count."""
-    weights = [max(len(c), 4) for c in cues]
+    weights = [max(len(c.replace("*", "")), 4) for c in cues]
     speak = total - gap * (len(cues) + 1)
     if speak <= 0:
         raise SystemExit("too many cues for the duration; shorten text or raise --duration")
@@ -68,12 +69,15 @@ def voice(cues, total, v):
     like Animal Crossing: quick burst, then the caption stays up in silence."""
     buf = np.zeros(int(total * SR) + SR)
     for cue in cues:
-        text = cue["text"].lower()
+        text = cue["text"].lower().replace("*", "")  # *word* = caption highlight, not spoken
+        cue["words"] = []
         units = sum(1 if ch.isalpha() else 2.5 if ch in ",;:.!?" else 0.5 for ch in text) or 1
         step = min(v["rate"], (cue["end"] - cue["start"]) * 0.95 / units)  # squeeze only if needed
         t, n = cue["start"], 0
         question, excited = text.rstrip().endswith("?"), text.rstrip().endswith("!")
-        for ch in text:
+        for i, ch in enumerate(text):
+            if ch != " " and (i == 0 or text[i - 1] == " "):
+                cue["words"].append(round(t, 3))  # when each word starts, for word-by-word captions
             if ch.isalpha():
                 f0 = v["pitch"] * 2 ** (LETTER_SEMI.get(ch, 0) / 12)
                 if question:
@@ -170,7 +174,7 @@ def main():
 
     (out / "cues.json").write_text(json.dumps(cues, indent=2))
     (out / "subtitles.srt").write_text("".join(
-        f"{i}\n{srt_time(c['start'])} --> {srt_time(c['end'])}\n{c['text']}\n\n" for i, c in enumerate(cues, 1)))
+        f"{i}\n{srt_time(c['start'])} --> {srt_time(c['end'])}\n{c['text'].replace('*', '')}\n\n" for i, c in enumerate(cues, 1)))
     print(f"wrote {len(cues)} cues, {a.duration}s -> {out}")
 
 
