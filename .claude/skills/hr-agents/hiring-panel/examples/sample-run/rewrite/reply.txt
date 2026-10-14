@@ -1,0 +1,50 @@
+<<<RESUME_MD>>>
+# {{PII_NAME}}
+{{PII_EMAIL}} | {{PII_PHONE}} | {{PII_ADDRESS}} | {{PII_LINKEDIN}} | [FILL IN: GitHub or portfolio URL]
+
+## Profile
+
+Frontend developer working with React, TypeScript and CSS/Sass, at Brightwave Digital in Gent since 2021. Contributed to a React design system used by the whole team and improved the performance of the main web app ([FILL IN: strongest measured result, e.g. Largest Contentful Paint from X s to Y s]).
+
+## Work experience
+
+### Frontend Developer, Brightwave Digital, Gent (2021 - present)
+
+- Contributed [FILL IN: what you built, e.g. components, design tokens, documentation, accessibility] to the React design system used by the whole team ([FILL IN: number of components, and how many developers and projects use it])
+- Improved the performance of the main web app by [FILL IN: what you changed, e.g. code-splitting, image optimisation]: [FILL IN: metric before and after, e.g. Largest Contentful Paint from X s to Y s, or Lighthouse score from X to Y]
+- Delivered the frontend of [FILL IN: number] client projects ([FILL IN: project types and stack]), working with [FILL IN: team size and roles, e.g. designers, backend developers, QA]
+- Mentored [FILL IN: number] junior team members through [FILL IN: how, e.g. code reviews, pair programming, onboarding]
+
+### Web Developer (freelance) (2019 - 2020)
+
+- Built WordPress websites for [FILL IN: number] local businesses
+- Handled SEO for client websites ([FILL IN: result, e.g. change in search ranking or traffic])
+
+### Intern, City of Ghent IT department (02/2019 - 05/2019)
+
+- Built a small Vue app for booking meeting rooms internally ([FILL IN: who used it, e.g. number of staff or bookings])
+
+## Education
+
+### Bachelor in Applied Computer Science (2016 - 2019)
+
+## Skills
+
+- Programming and markup: TypeScript, JavaScript, HTML, CSS/Sass
+- Frameworks and libraries: React, Vue
+- Platforms: Node.js, WordPress
+- Practices: design systems, web performance, SEO
+- Other tools and practices: [FILL IN: only what you really use, e.g. Git, Jest, Testing Library, Cypress or Playwright, accessibility (WCAG), responsive design, REST APIs, CI/CD, Agile/Scrum, Next.js]
+
+## Languages
+
+Dutch: native ([FILL IN: CEFR level]) · English: [FILL IN: CEFR level] · French: [FILL IN: CEFR level]
+
+## Hobbies
+
+Gaming, running, photography
+
+References available on request.
+<<<CHANGES_JSON>>>
+{"edits": [{"issue_ids": ["I2", "REGION"], "before": "{{PII_ADDRESS}} | {{PII_PHONE}} | {{PII_EMAIL}}\n{{PII_LINKEDIN}} | Date of birth: {{PII_DOB}}", "after": "{{PII_EMAIL}} | {{PII_PHONE}} | {{PII_ADDRESS}} | {{PII_LINKEDIN}} | [FILL IN: GitHub or portfolio URL]", "why": "Belgian CVs leave out the date of birth, and a GitHub or portfolio link matters more for a frontend role."}, {"issue_ids": ["I3", "I8"], "before": "## About me 🚀", "after": "## Profile", "why": "Standard heading with no emoji, which parsers and Belgian recruiters expect."}, {"issue_ids": ["I3"], "before": "Hardworking and passionate frontend developer and team player with a passion for clean code and great user experiences. Looking for a new challenge where I can grow!", "after": "Frontend developer working with React, TypeScript and CSS/Sass, at Brightwave Digital in Gent since 2021. Contributed to a React design system used by the whole team and improved the performance of the main web app ([FILL IN: strongest measured result, e.g. Largest Contentful Paint from X s to Y s]).", "why": "Replaces the cliches and the candidate-centred 'grow' line with stack, current role and the strongest proof points."}, {"issue_ids": ["I8"], "before": "## Where I've worked", "after": "## Work experience", "why": "Standard heading that ATS systems look for."}, {"issue_ids": ["I1", "I5"], "before": "Worked on a React design system used by the whole team", "after": "Contributed [FILL IN: what you built, e.g. components, design tokens, documentation, accessibility] to the React design system used by the whole team ([FILL IN: number of components, and how many developers and projects use it])", "why": "Keeps the strongest line the panel named, moves it to the top and asks for the candidate's own contribution and its adoption."}, {"issue_ids": ["I1"], "before": "Improved the performance of the main web app", "after": "Improved the performance of the main web app by [FILL IN: what you changed, e.g. code-splitting, image optimisation]: [FILL IN: metric before and after, e.g. Largest Contentful Paint from X s to Y s, or Lighthouse score from X to Y]", "why": "Turns a vague claim into action, method and measured result."}, {"issue_ids": ["I1", "I5"], "before": "Responsible for the frontend of several client projects", "after": "Delivered the frontend of [FILL IN: number] client projects ([FILL IN: project types and stack]), working with [FILL IN: team size and roles, e.g. designers, backend developers, QA]", "why": "Replaces a duty with deliverables, scale, stack and working setup."}, {"issue_ids": ["I1", "I5"], "before": "Helped the juniors", "after": "Mentored [FILL IN: number] junior team members through [FILL IN: how, e.g. code reviews, pair programming, onboarding]", "why": "Gives the mentoring line scale and method instead of a vague phrase."}, {"issue_ids": ["I1"], "before": "Made websites for local businesses in WordPress", "after": "Built WordPress websites for [FILL IN: number] local businesses", "why": "Stronger verb and room for the number of clients served."}, {"issue_ids": ["I1"], "before": "SEO", "after": "Handled SEO for client websites ([FILL IN: result, e.g. change in search ranking or traffic])", "why": "A one-word bullet becomes an action with a measurable result."}, {"issue_ids": ["I1"], "before": "Built a small Vue app for booking meeting rooms internally", "after": "Built a small Vue app for booking meeting rooms internally ([FILL IN: who used it, e.g. number of staff or bookings])", "why": "Adds room for the app's real usage."}, {"issue_ids": ["I6", "I8", "I4"], "before": "| Skill | Level |\n|---|---|\n| React | ●●●●○ |\n| TypeScript | ●●●○○ |\n| CSS / Sass | ●●●●● |\n| Node.js | ●●○○○ |", "after": "- Programming and markup: TypeScript, JavaScript, HTML, CSS/Sass\n- Frameworks and libraries: React, Vue\n- Platforms: Node.js, WordPress\n- Practices: design systems, web performance, SEO\n- Other tools and practices: [FILL IN: only what you really use, e.g. Git, Jest, Testing Library, Cypress or Playwright, accessibility (WCAG), responsive design, REST APIs, CI/CD, Agile/Scrum, Next.js]", "why": "Removes the table and self-rated dot bars that parsers drop and that invite screening on the weakest rating, and adds Vue, WordPress and SEO from the experience section."}, {"issue_ids": ["I7"], "before": "", "after": "JavaScript", "why": "Required keyword; the candidate built Vue and React apps, which are written in JavaScript.", "added_keywords": ["JavaScript"], "evidence_quote": "Built a small Vue app for booking meeting rooms internally"}, {"issue_ids": ["I7"], "before": "", "after": "HTML", "why": "Required keyword; building websites for clients involves HTML.", "added_keywords": ["HTML"], "evidence_quote": "Made websites for local businesses in WordPress"}, {"issue_ids": ["I6", "I7"], "before": "", "after": "Other tools and practices: [FILL IN: only what you really use, e.g. Git, Jest, Testing Library, Cypress or Playwright, accessibility (WCAG), responsive design, REST APIs, CI/CD, Agile/Scrum, Next.js]", "why": "Lets the candidate add expected tools such as Git and testing only if they really use them."}, {"issue_ids": ["I4", "REGION"], "before": "Dutch: native · English: very good · French: basic", "after": "Dutch: native ([FILL IN: CEFR level]) · English: [FILL IN: CEFR level] · French: [FILL IN: CEFR level]", "why": "Belgian employers expect CEFR levels, and 'very good' and 'basic' can't be converted without guessing."}], "unaddressed": [{"issue_id": "I1", "kind": "needs_info", "reason": "The original has no results, counts or scale (performance metrics, number of client projects, design-system adoption, juniors mentored, businesses served); [FILL IN] placeholders mark each spot."}, {"issue_id": "I5", "kind": "needs_info", "reason": "Only the candidate knows the project count, stack per project, team setup and what they personally built for the design system."}, {"issue_id": "I4", "kind": "needs_info", "reason": "CEFR levels for Dutch, English and French must come from the candidate or a certificate."}, {"issue_id": "I2", "kind": "needs_info", "reason": "The original has no GitHub or portfolio link; a placeholder was added to the contact line."}, {"issue_id": "I7", "kind": "real_gap", "reason": "Git, unit testing, accessibility, responsive design, REST APIs, Agile/Scrum, CI/CD and Next.js have no evidence in the original, so they were not added as facts; the candidate can list those they really use in the Skills placeholder."}]}
+<<<END>>>

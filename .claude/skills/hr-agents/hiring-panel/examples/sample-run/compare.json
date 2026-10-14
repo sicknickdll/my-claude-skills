@@ -1,0 +1,71 @@
+{
+  "before_headline": "6 of 7 reviewers that reached a decision rejected",
+  "after_headline": "4 of 7 reviewers that reached a decision rejected",
+  "rows": [
+    {
+      "agent": "ats",
+      "name": "ATS screener",
+      "stage": 1,
+      "before": "ADVANCE",
+      "before_confidence": 3,
+      "after": "ADVANCE",
+      "after_confidence": 3
+    },
+    {
+      "agent": "hr",
+      "name": "HR recruiter",
+      "stage": 1,
+      "before": "REJECT",
+      "before_confidence": 4,
+      "after": "REJECT",
+      "after_confidence": 3
+    },
+    {
+      "agent": "hm",
+      "name": "Hiring manager",
+      "stage": 2,
+      "before": "REJECT",
+      "before_confidence": 4,
+      "after": "ADVANCE",
+      "after_confidence": 2
+    },
+    {
+      "agent": "lead",
+      "name": "Team lead",
+      "stage": 3,
+      "before": "REJECT",
+      "before_confidence": 4,
+      "after": "ADVANCE",
+      "after_confidence": 2
+    },
+    {
+      "agent": "peer",
+      "name": "Senior peer",
+      "stage": 3,
+      "before": "REJECT",
+      "before_confidence": 4,
+      "after": "REJECT",
+      "after_confidence": 4
+    },
+    {
+      "agent": "applicant",
+      "name": "Rival applicant",
+      "stage": 3,
+      "before": "REJECT",
+      "before_confidence": 4,
+      "after": "REJECT",
+      "after_confidence": 4
+    },
+    {
+      "agent": "ceo",
+      "name": "CEO",
+      "stage": 4,
+      "before": "REJECT",
+      "before_confidence": 4,
+      "after": "REJECT",
+      "after_confidence": 3
+    }
+  ],
+  "issues_before": 8,
+  "issues_after": 12
+}

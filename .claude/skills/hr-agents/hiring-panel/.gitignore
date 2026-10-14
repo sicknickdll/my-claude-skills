@@ -1,0 +1,5 @@
+# run folders hold personal data (input/pii.json): never commit them
+.hiring-panel/
+__pycache__/
+*.pyc
+.pytest_cache/

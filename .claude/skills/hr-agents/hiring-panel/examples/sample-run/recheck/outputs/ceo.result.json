@@ -1,0 +1,86 @@
+{
+  "agent": "ceo",
+  "attempt": 1,
+  "errors": [],
+  "soft_errors": [],
+  "warnings": [],
+  "dropped": [],
+  "final_view": {
+    "status": "ok",
+    "data": {
+      "agent": "ceo",
+      "confidence": 3,
+      "verdict": "REJECT",
+      "issues": [
+        {
+          "problem": "This is the main claim of five years at one company, and it shows no ownership or business outcome. 'Contributed' hides what this person actually did. Most of the 120 frontend applicants will claim a design system and a performance win. Nothing here separates this person from them, and nothing ties the work to revenue, conversion, delivery speed or customers. I can't tell whether they lead work or follow it.",
+          "fix": "Say what you owned and what changed for the business. Give the measured performance result (for example LCP from X s to Y s) and say how many users or clients the app serves. Give design system adoption (components, teams, projects) and the effect, such as faster delivery or fewer UI bugs. Use verbs like 'led', 'built' or 'cut'.",
+          "severity": 3,
+          "category": "impact",
+          "scope": "line",
+          "quote": "Contributed to a React design system used by the whole team"
+        },
+        {
+          "problem": "The freelance WordPress and SEO work and the Vue intern project take up about a third of the page. They describe a different job (CMS sites for local businesses), not product frontend work with React and TypeScript. They also add little to a candidate who has been at Brightwave Digital since 2021. They dilute the strong part of the CV and make the trajectory look flat.",
+          "fix": "Cut the freelance and internship entries to one line each, or merge them into a short 'Earlier experience' line. Keep the freed space for outcomes at Brightwave Digital. Drop the SEO line unless it shows a real result.",
+          "severity": 2,
+          "category": "relevance",
+          "scope": "section",
+          "quote": "Web Developer (freelance) (2019 - 2020)"
+        },
+        {
+          "problem": "A Belgian employer expects CEFR levels for Dutch, French and English. 'Native' is not a CEFR level, and French and English are still unfilled. In Gent, French and English level matter for client-facing work.",
+          "fix": "Write all three on the CEFR scale, for example 'Dutch: C2 · English: C1 · French: B2', and drop the word 'native'.",
+          "severity": 1,
+          "category": "region",
+          "scope": "line",
+          "quote": "Dutch: native"
+        }
+      ],
+      "strength": {
+        "quote": "React design system used by the whole team",
+        "why": "It names a concrete, widely adopted internal product and the exact stack for a frontend role. It signals work that other developers depend on. It becomes strong once the contribution and adoption numbers are added."
+      }
+    },
+    "errors": [],
+    "soft_errors": [],
+    "warnings": [],
+    "dropped": []
+  },
+  "status": "ok",
+  "data": {
+    "agent": "ceo",
+    "confidence": 3,
+    "verdict": "REJECT",
+    "issues": [
+      {
+        "problem": "This is the main claim of five years at one company, and it shows no ownership or business outcome. 'Contributed' hides what this person actually did. Most of the 120 frontend applicants will claim a design system and a performance win. Nothing here separates this person from them, and nothing ties the work to revenue, conversion, delivery speed or customers. I can't tell whether they lead work or follow it.",
+        "fix": "Say what you owned and what changed for the business. Give the measured performance result (for example LCP from X s to Y s) and say how many users or clients the app serves. Give design system adoption (components, teams, projects) and the effect, such as faster delivery or fewer UI bugs. Use verbs like 'led', 'built' or 'cut'.",
+        "severity": 3,
+        "category": "impact",
+        "scope": "line",
+        "quote": "Contributed to a React design system used by the whole team"
+      },
+      {
+        "problem": "The freelance WordPress and SEO work and the Vue intern project take up about a third of the page. They describe a different job (CMS sites for local businesses), not product frontend work with React and TypeScript. They also add little to a candidate who has been at Brightwave Digital since 2021. They dilute the strong part of the CV and make the trajectory look flat.",
+        "fix": "Cut the freelance and internship entries to one line each, or merge them into a short 'Earlier experience' line. Keep the freed space for outcomes at Brightwave Digital. Drop the SEO line unless it shows a real result.",
+        "severity": 2,
+        "category": "relevance",
+        "scope": "section",
+        "quote": "Web Developer (freelance) (2019 - 2020)"
+      },
+      {
+        "problem": "A Belgian employer expects CEFR levels for Dutch, French and English. 'Native' is not a CEFR level, and French and English are still unfilled. In Gent, French and English level matter for client-facing work.",
+        "fix": "Write all three on the CEFR scale, for example 'Dutch: C2 · English: C1 · French: B2', and drop the word 'native'.",
+        "severity": 1,
+        "category": "region",
+        "scope": "line",
+        "quote": "Dutch: native"
+      }
+    ],
+    "strength": {
+      "quote": "React design system used by the whole team",
+      "why": "It names a concrete, widely adopted internal product and the exact stack for a frontend role. It signals work that other developers depend on. It becomes strong once the contribution and adoption numbers are added."
+    }
+  }
+}

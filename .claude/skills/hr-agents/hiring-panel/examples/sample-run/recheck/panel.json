@@ -1,0 +1,600 @@
+{
+  "run": "20261011-135435/recheck",
+  "recheck": true,
+  "pile_size": 120,
+  "seed": 45245,
+  "headline": "4 of 7 reviewers that reached a decision rejected",
+  "ats_line": "ATS: most real applicant tracking systems rank and filter for a recruiter rather than auto-reject, so read the ATS reviewer as \"would this surface\". No score is given because none would be real.",
+  "decisions": [
+    {
+      "agent": "ats",
+      "name": "ATS screener",
+      "stage": 1,
+      "status": "ok",
+      "verdict": "ADVANCE",
+      "confidence": 3,
+      "native": "PASS"
+    },
+    {
+      "agent": "hr",
+      "name": "HR recruiter",
+      "stage": 1,
+      "status": "ok",
+      "verdict": "REJECT",
+      "confidence": 3,
+      "native": null
+    },
+    {
+      "agent": "hm",
+      "name": "Hiring manager",
+      "stage": 2,
+      "status": "ok",
+      "verdict": "ADVANCE",
+      "confidence": 2,
+      "native": "interview YES"
+    },
+    {
+      "agent": "lead",
+      "name": "Team lead",
+      "stage": 3,
+      "status": "ok",
+      "verdict": "ADVANCE",
+      "confidence": 2,
+      "native": null
+    },
+    {
+      "agent": "peer",
+      "name": "Senior peer",
+      "stage": 3,
+      "status": "ok",
+      "verdict": "REJECT",
+      "confidence": 4,
+      "native": null
+    },
+    {
+      "agent": "applicant",
+      "name": "Rival applicant",
+      "stage": 3,
+      "status": "ok",
+      "verdict": "REJECT",
+      "confidence": 4,
+      "native": null
+    },
+    {
+      "agent": "ceo",
+      "name": "CEO",
+      "stage": 4,
+      "status": "ok",
+      "verdict": "REJECT",
+      "confidence": 3,
+      "native": null
+    }
+  ],
+  "issues": [
+    {
+      "id": "I1",
+      "raised_by": [
+        "hr",
+        "applicant",
+        "ats",
+        "hm"
+      ],
+      "n_reviewers": 4,
+      "max_severity": 3,
+      "sum_severity": 10,
+      "sum_confidence": 12,
+      "first_stage": 1,
+      "category": "impact",
+      "scope": "line",
+      "quote": "Improved the performance of the main web app by",
+      "problem": "In an 8-second skim the Brightwave role, five years of the career, reads as generic: \"Contributed\" to a design system and \"improved\" performance, with no numbers, no stated scope and no clear personal ownership. Every frontend applicant in a pile of 120 claims this. Without a before/after metric and a clear \"I built X\", the strongest bullets give a recruiter no reason to move this CV above the others.",
+      "fix": "Fill in the Brightwave bullets with real figures and an active owner verb: e.g. \"Cut Largest Contentful Paint from 4.1 s to 2.2 s by code-splitting and image optimisation\" and \"Built 25 components and the design tokens for a React design system used by 8 developers on 6 projects\". Put the best metric in the Profile as well.",
+      "members": [
+        {
+          "agent": "hr",
+          "quote": "Improved the performance of the main web app by",
+          "problem": "In an 8-second skim the Brightwave role, five years of the career, reads as generic: \"Contributed\" to a design system and \"improved\" performance, with no numbers, no stated scope and no clear personal ownership. Every frontend applicant in a pile of 120 claims this. Without a before/after metric and a clear \"I built X\", the strongest bullets give a recruiter no reason to move this CV above the others.",
+          "fix": "Fill in the Brightwave bullets with real figures and an active owner verb: e.g. \"Cut Largest Contentful Paint from 4.1 s to 2.2 s by code-splitting and image optimisation\" and \"Built 25 components and the design tokens for a React design system used by 8 developers on 6 projects\". Put the best metric in the Profile as well.",
+          "severity": 3,
+          "category": "impact",
+          "scope": "line"
+        },
+        {
+          "agent": "applicant",
+          "quote": "Improved the performance of the main web app by",
+          "problem": "The strongest claim has no before/after number anywhere in the CV, including the profile. Rivals with 4+ years of React will show a concrete LCP, Lighthouse or bundle-size change. A \"main web app\" performance claim with no figure reads as a task description, not a result, so the CV is indistinguishable from the other decent ones in the pile.",
+          "fix": "State the specific change (e.g. route-level code-splitting, image optimisation) and the measured result (e.g. LCP from X s to Y s, Lighthouse from X to Y). Repeat that single number in the profile. Give every bullet at least one number: components shipped, projects delivered, juniors mentored.",
+          "severity": 3,
+          "category": "impact",
+          "scope": "line"
+        },
+        {
+          "agent": "ats",
+          "quote": "Improved the performance of the main web app by",
+          "problem": "The strongest frontend claim still has no confirmed change or number. Recruiters filter for measurable outcomes (LCP, Lighthouse, bundle size), and the design system and mentoring bullets are equally unquantified. Without them this reads as an average resume in a pile of 120.",
+          "fix": "Fill in the actual technique (code-splitting, image optimisation) and a before/after metric. Add the number of components and the number of developers or projects using the design system.",
+          "severity": 2,
+          "category": "impact",
+          "scope": "section"
+        },
+        {
+          "agent": "hm",
+          "quote": "Improved the performance of the main web app by",
+          "problem": "The verbs 'Contributed' and 'Improved' show participation, not ownership, and one performance metric is the only outcome on the CV. The recent hands-on level is hard to judge, so interview confidence stays low. Delivery and mentoring bullets will also read as generic unless they carry numbers.",
+          "fix": "Rewrite each bullet as 'I did X, which produced Y': what you changed (code-splitting, image optimisation), the before and after metric, and your own role versus the team's. Give real numbers for projects delivered and juniors mentored.",
+          "severity": 2,
+          "category": "impact",
+          "scope": "line"
+        }
+      ],
+      "score": 12
+    },
+    {
+      "id": "I2",
+      "raised_by": [
+        "hr",
+        "hm",
+        "lead",
+        "peer",
+        "applicant"
+      ],
+      "n_reviewers": 5,
+      "max_severity": 2,
+      "sum_severity": 10,
+      "sum_confidence": 15,
+      "first_stage": 1,
+      "category": "keywords",
+      "scope": "section",
+      "quote": "Other tools and practices:",
+      "problem": "The Skills section lists only languages, frameworks and platforms. The terms a typical Frontend Developer posting screens on (Git, unit and end-to-end testing, accessibility/WCAG, responsive design, REST APIs, CI/CD, Agile) are absent, and Next.js is not mentioned. WordPress and SEO sit among the core skills and dilute the frontend focus. A recruiter scanning for those terms finds nothing and assumes the candidate lacks them.",
+      "fix": "Fill this line with what is genuinely used (e.g. Git, Jest, Testing Library, Playwright, WCAG accessibility, responsive design, REST APIs, CI/CD, Agile/Scrum) and repeat the strongest ones inside the Brightwave bullets. Move WordPress and SEO to the end of the list or drop them.",
+      "members": [
+        {
+          "agent": "hr",
+          "quote": "Other tools and practices:",
+          "problem": "The Skills section lists only languages, frameworks and platforms. The terms a typical Frontend Developer posting screens on (Git, unit and end-to-end testing, accessibility/WCAG, responsive design, REST APIs, CI/CD, Agile) are absent, and Next.js is not mentioned. WordPress and SEO sit among the core skills and dilute the frontend focus. A recruiter scanning for those terms finds nothing and assumes the candidate lacks them.",
+          "fix": "Fill this line with what is genuinely used (e.g. Git, Jest, Testing Library, Playwright, WCAG accessibility, responsive design, REST APIs, CI/CD, Agile/Scrum) and repeat the strongest ones inside the Brightwave bullets. Move WordPress and SEO to the end of the list or drop them.",
+          "severity": 2,
+          "category": "keywords",
+          "scope": "section"
+        },
+        {
+          "agent": "hm",
+          "quote": "Other tools and practices:",
+          "problem": "A frontend manager screens for testing, accessibility, Git and CI/CD. None of them appears anywhere in the CV, so I can't tell whether this person tests or ships with discipline. The earlier roles (WordPress, SEO, a small Vue app) also pull focus away from the React and TypeScript story.",
+          "fix": "List only what is really used (Git, Jest or Testing Library, Cypress or Playwright, WCAG, responsive design, CI/CD, Next.js). Tie testing and accessibility to the design system or performance bullets, and cut the freelance WordPress and SEO lines to one short line.",
+          "severity": 2,
+          "category": "keywords",
+          "scope": "section"
+        },
+        {
+          "agent": "lead",
+          "quote": "Other tools and practices:",
+          "problem": "Nothing in the CV shows testing, accessibility, Git workflow or CI/CD. A team lead needs those to know the candidate can ship reviewed, tested, accessible code without hand-holding. With no evidence of them, a five-year React/TypeScript profile looks like it covers building UI but not the engineering around it.",
+          "fix": "List only the tools actually used (for example Git, Jest or Testing Library, Cypress or Playwright, WCAG, CI). Show at least one in a bullet, such as test coverage on the design system or an accessibility audit fix, instead of leaving it as a bare skills line.",
+          "severity": 2,
+          "category": "keywords",
+          "scope": "section"
+        },
+        {
+          "agent": "peer",
+          "quote": "Other tools and practices:",
+          "problem": "A frontend peer expects testing, accessibility, version control, CI and build tooling as the baseline for someone with about 5 years of experience. None of it appears in any bullet, and the skills line is only a placeholder. Nothing shows how the candidate tests, reviews or ships code. A design-system author with no mention of a11y or tests looks junior.",
+          "fix": "List only what you genuinely use (Git, Jest/Testing Library, Cypress or Playwright, WCAG, responsive design, REST APIs, CI/CD, Next.js if true). Tie at least two of them to bullets, for example \"added Testing Library tests to the design system\" or \"WCAG 2.1 AA audit of the checkout flow\".",
+          "severity": 2,
+          "category": "keywords",
+          "scope": "section"
+        },
+        {
+          "agent": "applicant",
+          "quote": "Other tools and practices:",
+          "problem": "The skills section does not contain what a Frontend Developer posting screens on: testing (Jest, Testing Library, Cypress or Playwright), accessibility/WCAG, Git, responsive design, REST APIs, CI/CD, and Next.js if used. WordPress, SEO and Vue from the freelance and intern years take up space instead. The seniors you are competing with list these explicitly, so this CV loses keyword matches and signals less depth.",
+          "fix": "Fill this line with only the tools you really use, led by testing, accessibility, Git, responsive design and CI/CD. Move WordPress and SEO to a short secondary line or drop them. Make sure React and TypeScript work shows up in the bullets, not only in the skills list.",
+          "severity": 2,
+          "category": "keywords",
+          "scope": "section"
+        }
+      ],
+      "score": 10
+    },
+    {
+      "id": "I3",
+      "raised_by": [
+        "lead",
+        "peer",
+        "ceo"
+      ],
+      "n_reviewers": 3,
+      "max_severity": 3,
+      "sum_severity": 9,
+      "sum_confidence": 9,
+      "first_stage": 3,
+      "category": "impact",
+      "scope": "line",
+      "quote": "the React design system used by the whole team",
+      "problem": "\"Contributed\" and \"used by the whole team\" hide what this person actually did. I can't tell if they built, owned or only patched the design system, so I can't judge their level or what they could own by day 30. In a pile of 120 frontend CVs, an unclear role on the headline achievement reads as a junior contribution.",
+      "fix": "Replace \"Contributed\" with a verb that shows ownership (built, led, maintained, introduced). Name what you personally shipped, such as components, design tokens or accessibility work. Add the scale: number of components, number of developers and projects using it.",
+      "members": [
+        {
+          "agent": "lead",
+          "quote": "the React design system used by the whole team",
+          "problem": "\"Contributed\" and \"used by the whole team\" hide what this person actually did. I can't tell if they built, owned or only patched the design system, so I can't judge their level or what they could own by day 30. In a pile of 120 frontend CVs, an unclear role on the headline achievement reads as a junior contribution.",
+          "fix": "Replace \"Contributed\" with a verb that shows ownership (built, led, maintained, introduced). Name what you personally shipped, such as components, design tokens or accessibility work. Add the scale: number of components, number of developers and projects using it.",
+          "severity": 3,
+          "category": "impact",
+          "scope": "line"
+        },
+        {
+          "agent": "peer",
+          "quote": "to the React design system used by the whole team",
+          "problem": "The two claims that carry the whole CV (the design system and the performance work) are written with weak verbs, \"Contributed\" and \"Improved\". A peer cannot tell whether this person owned components, tokens and docs or fixed a few buttons. \"Used by the whole team\" also reads as a small internal audience. Even with the blanks filled, nothing yet shows the difficulty or ownership that separates this CV from the other ~120 frontend CVs, which list the same React/TypeScript/design-system line.",
+          "fix": "Rewrite both bullets around what you personally owned and measured. For example: \"Built 24 accessible React components and the design-token pipeline, adopted by 6 developers across 9 projects\". For performance, name the technique and the numbers: \"Cut LCP on the main app from 4.1 s to 2.2 s by route-level code-splitting and image optimisation\". Use strong verbs (built, led, designed, reduced).",
+          "severity": 3,
+          "category": "impact",
+          "scope": "line"
+        },
+        {
+          "agent": "ceo",
+          "quote": "Contributed to a React design system used by the whole team",
+          "problem": "This is the main claim of five years at one company, and it shows no ownership or business outcome. 'Contributed' hides what this person actually did. Most of the 120 frontend applicants will claim a design system and a performance win. Nothing here separates this person from them, and nothing ties the work to revenue, conversion, delivery speed or customers. I can't tell whether they lead work or follow it.",
+          "fix": "Say what you owned and what changed for the business. Give the measured performance result (for example LCP from X s to Y s) and say how many users or clients the app serves. Give design system adoption (components, teams, projects) and the effect, such as faster delivery or fewer UI bugs. Use verbs like 'led', 'built' or 'cut'.",
+          "severity": 3,
+          "category": "impact",
+          "scope": "line"
+        }
+      ],
+      "score": 9
+    },
+    {
+      "id": "I4",
+      "raised_by": [
+        "lead",
+        "ceo"
+      ],
+      "n_reviewers": 2,
+      "max_severity": 2,
+      "sum_severity": 3,
+      "sum_confidence": 5,
+      "first_stage": 3,
+      "category": "region",
+      "scope": "section",
+      "quote": "Dutch: native",
+      "problem": "This is a Belgian CV, and \"native\" is not a CEFR level. English is the working language in most scale-up frontend teams, but its level is not stated. French is also missing a level. Employers here expect CEFR levels for all three languages.",
+      "fix": "Write all three on the CEFR scale in one line, for example \"Dutch: C2 · English: C1 · French: B1\" (use your real levels). Drop \"native\".",
+      "members": [
+        {
+          "agent": "lead",
+          "quote": "Dutch: native",
+          "problem": "This is a Belgian CV, and \"native\" is not a CEFR level. English is the working language in most scale-up frontend teams, but its level is not stated. French is also missing a level. Employers here expect CEFR levels for all three languages.",
+          "fix": "Write all three on the CEFR scale in one line, for example \"Dutch: C2 · English: C1 · French: B1\" (use your real levels). Drop \"native\".",
+          "severity": 2,
+          "category": "region",
+          "scope": "section"
+        },
+        {
+          "agent": "ceo",
+          "quote": "Dutch: native",
+          "problem": "A Belgian employer expects CEFR levels for Dutch, French and English. 'Native' is not a CEFR level, and French and English are still unfilled. In Gent, French and English level matter for client-facing work.",
+          "fix": "Write all three on the CEFR scale, for example 'Dutch: C2 · English: C1 · French: B2', and drop the word 'native'.",
+          "severity": 1,
+          "category": "region",
+          "scope": "line"
+        }
+      ],
+      "score": 4
+    },
+    {
+      "id": "I5",
+      "raised_by": [
+        "peer"
+      ],
+      "n_reviewers": 1,
+      "max_severity": 2,
+      "sum_severity": 2,
+      "sum_confidence": 4,
+      "first_stage": 3,
+      "category": "relevance",
+      "scope": "section",
+      "quote": "Handled SEO for client websites",
+      "problem": "The 2019-2020 freelance WordPress and SEO work and the Vue room-booking intern project say little about frontend craft. They fill space that should go to the current job. The only role with real scope, Brightwave, has four thin bullets, and its project-delivery bullet gives no stack, team or complexity. The resume also never says what the main web app is, who uses it, or how large it is.",
+      "fix": "Condense the freelance role and the internship to one line each, or merge them into \"Earlier experience\". Expand Brightwave with what the main web app does, its scale (users, pages, codebase), your stack (React, TypeScript, state management, build tooling) and your role on the client projects.",
+      "members": [
+        {
+          "agent": "peer",
+          "quote": "Handled SEO for client websites",
+          "problem": "The 2019-2020 freelance WordPress and SEO work and the Vue room-booking intern project say little about frontend craft. They fill space that should go to the current job. The only role with real scope, Brightwave, has four thin bullets, and its project-delivery bullet gives no stack, team or complexity. The resume also never says what the main web app is, who uses it, or how large it is.",
+          "fix": "Condense the freelance role and the internship to one line each, or merge them into \"Earlier experience\". Expand Brightwave with what the main web app does, its scale (users, pages, codebase), your stack (React, TypeScript, state management, build tooling) and your role on the client projects.",
+          "severity": 2,
+          "category": "relevance",
+          "scope": "section"
+        }
+      ],
+      "score": 2
+    },
+    {
+      "id": "I6",
+      "raised_by": [
+        "applicant"
+      ],
+      "n_reviewers": 1,
+      "max_severity": 2,
+      "sum_severity": 2,
+      "sum_confidence": 4,
+      "first_stage": 3,
+      "category": "relevance",
+      "scope": "line",
+      "quote": "to the React design system used by the whole team",
+      "problem": "\"Contributed to\" with \"the whole team\" as the audience undersells the scope. It does not show ownership, size or adoption. Strong rivals say they built or led a design system consumed by several teams or products. As written it reads as one developer among many, on an internal library with few users.",
+      "fix": "Say what you owned (tokens, accessible components, Storybook, docs, versioning). Give the component count and the number of developers and projects that consume it. Use a verb that matches your real role: built, led, maintained.",
+      "members": [
+        {
+          "agent": "applicant",
+          "quote": "to the React design system used by the whole team",
+          "problem": "\"Contributed to\" with \"the whole team\" as the audience undersells the scope. It does not show ownership, size or adoption. Strong rivals say they built or led a design system consumed by several teams or products. As written it reads as one developer among many, on an internal library with few users.",
+          "fix": "Say what you owned (tokens, accessible components, Storybook, docs, versioning). Give the component count and the number of developers and projects that consume it. Use a verb that matches your real role: built, led, maintained.",
+          "severity": 2,
+          "category": "relevance",
+          "scope": "line"
+        }
+      ],
+      "score": 2
+    },
+    {
+      "id": "I7",
+      "raised_by": [
+        "ats"
+      ],
+      "n_reviewers": 1,
+      "max_severity": 2,
+      "sum_severity": 2,
+      "sum_confidence": 3,
+      "first_stage": 1,
+      "category": "contact",
+      "scope": "whole",
+      "quote": "[FILL IN: GitHub or portfolio URL]",
+      "problem": "A frontend candidate with no visible GitHub or portfolio link gives the recruiter nothing to verify the work against. That weakens the CV compared with candidates who link live projects.",
+      "fix": "Add a GitHub profile or portfolio URL to the header. Make sure it shows the design system or performance work, or comparable projects.",
+      "members": [
+        {
+          "agent": "ats",
+          "quote": "[FILL IN: GitHub or portfolio URL]",
+          "problem": "A frontend candidate with no visible GitHub or portfolio link gives the recruiter nothing to verify the work against. That weakens the CV compared with candidates who link live projects.",
+          "fix": "Add a GitHub profile or portfolio URL to the header. Make sure it shows the design system or performance work, or comparable projects.",
+          "severity": 2,
+          "category": "contact",
+          "scope": "whole"
+        }
+      ],
+      "score": 2
+    },
+    {
+      "id": "I8",
+      "raised_by": [
+        "ats"
+      ],
+      "n_reviewers": 1,
+      "max_severity": 2,
+      "sum_severity": 2,
+      "sum_confidence": 3,
+      "first_stage": 1,
+      "category": "region",
+      "scope": "section",
+      "quote": "Dutch: native ([FILL IN: CEFR level])",
+      "problem": "Belgian employers expect CEFR levels for Dutch, French and English. \"native\" is not a CEFR level, and the English and French levels are blank. Language is a likely screening filter for this region.",
+      "fix": "Write it as \"Dutch: C2 · English: C1 · French: B2\", using your real levels.",
+      "members": [
+        {
+          "agent": "ats",
+          "quote": "Dutch: native ([FILL IN: CEFR level])",
+          "problem": "Belgian employers expect CEFR levels for Dutch, French and English. \"native\" is not a CEFR level, and the English and French levels are blank. Language is a likely screening filter for this region.",
+          "fix": "Write it as \"Dutch: C2 · English: C1 · French: B2\", using your real levels.",
+          "severity": 2,
+          "category": "region",
+          "scope": "section"
+        }
+      ],
+      "score": 2
+    },
+    {
+      "id": "I9",
+      "raised_by": [
+        "ats"
+      ],
+      "n_reviewers": 1,
+      "max_severity": 2,
+      "sum_severity": 2,
+      "sum_confidence": 3,
+      "first_stage": 1,
+      "category": "keywords",
+      "scope": "section",
+      "quote": "Other tools and practices: [FILL IN: only what you really use",
+      "problem": "The core frontend screening terms are not confirmed anywhere: Git, a test framework, responsive design, REST API integration, accessibility and CI/CD. A keyword filter for a typical Frontend Developer posting would rank this resume below ones that list them.",
+      "fix": "List only the tools you really use. Cover version control, unit and end-to-end testing, accessibility (WCAG), responsive and cross-browser work, REST APIs, CI/CD and Agile. Also use the same terms in the experience bullets.",
+      "members": [
+        {
+          "agent": "ats",
+          "quote": "Other tools and practices: [FILL IN: only what you really use",
+          "problem": "The core frontend screening terms are not confirmed anywhere: Git, a test framework, responsive design, REST API integration, accessibility and CI/CD. A keyword filter for a typical Frontend Developer posting would rank this resume below ones that list them.",
+          "fix": "List only the tools you really use. Cover version control, unit and end-to-end testing, accessibility (WCAG), responsive and cross-browser work, REST APIs, CI/CD and Agile. Also use the same terms in the experience bullets.",
+          "severity": 2,
+          "category": "keywords",
+          "scope": "section"
+        }
+      ],
+      "score": 2
+    },
+    {
+      "id": "I10",
+      "raised_by": [
+        "hr"
+      ],
+      "n_reviewers": 1,
+      "max_severity": 2,
+      "sum_severity": 2,
+      "sum_confidence": 3,
+      "first_stage": 1,
+      "category": "gaps",
+      "scope": "section",
+      "quote": "Web Developer (freelance) (2019 - 2020)",
+      "problem": "The dates are hard to read in a skim. The freelance job (2019 - 2020) and the Brightwave job (2021 - present) use years only, so a possible gap of up to a year is visible, while the internship uses MM/YYYY. The freelance job starts in 2019, the same year as the internship and graduation, so the order is unclear. The degree also has no school name, so a recruiter cannot verify it. Dutch is given as \"native\" instead of a CEFR level, which Belgian employers expect.",
+      "fix": "Use MM/YYYY consistently for every job, and add a one-line explanation if there was a real gap between 2020 and 2021. Add the school name to the degree. Write language levels on the CEFR scale (e.g. Dutch: C2 · English: C1 · French: B1).",
+      "members": [
+        {
+          "agent": "hr",
+          "quote": "Web Developer (freelance) (2019 - 2020)",
+          "problem": "The dates are hard to read in a skim. The freelance job (2019 - 2020) and the Brightwave job (2021 - present) use years only, so a possible gap of up to a year is visible, while the internship uses MM/YYYY. The freelance job starts in 2019, the same year as the internship and graduation, so the order is unclear. The degree also has no school name, so a recruiter cannot verify it. Dutch is given as \"native\" instead of a CEFR level, which Belgian employers expect.",
+          "fix": "Use MM/YYYY consistently for every job, and add a one-line explanation if there was a real gap between 2020 and 2021. Add the school name to the degree. Write language levels on the CEFR scale (e.g. Dutch: C2 · English: C1 · French: B1).",
+          "severity": 2,
+          "category": "gaps",
+          "scope": "section"
+        }
+      ],
+      "score": 2
+    },
+    {
+      "id": "I11",
+      "raised_by": [
+        "ceo"
+      ],
+      "n_reviewers": 1,
+      "max_severity": 2,
+      "sum_severity": 2,
+      "sum_confidence": 3,
+      "first_stage": 4,
+      "category": "relevance",
+      "scope": "section",
+      "quote": "Web Developer (freelance) (2019 - 2020)",
+      "problem": "The freelance WordPress and SEO work and the Vue intern project take up about a third of the page. They describe a different job (CMS sites for local businesses), not product frontend work with React and TypeScript. They also add little to a candidate who has been at Brightwave Digital since 2021. They dilute the strong part of the CV and make the trajectory look flat.",
+      "fix": "Cut the freelance and internship entries to one line each, or merge them into a short 'Earlier experience' line. Keep the freed space for outcomes at Brightwave Digital. Drop the SEO line unless it shows a real result.",
+      "members": [
+        {
+          "agent": "ceo",
+          "quote": "Web Developer (freelance) (2019 - 2020)",
+          "problem": "The freelance WordPress and SEO work and the Vue intern project take up about a third of the page. They describe a different job (CMS sites for local businesses), not product frontend work with React and TypeScript. They also add little to a candidate who has been at Brightwave Digital since 2021. They dilute the strong part of the CV and make the trajectory look flat.",
+          "fix": "Cut the freelance and internship entries to one line each, or merge them into a short 'Earlier experience' line. Keep the freed space for outcomes at Brightwave Digital. Drop the SEO line unless it shows a real result.",
+          "severity": 2,
+          "category": "relevance",
+          "scope": "section"
+        }
+      ],
+      "score": 2
+    },
+    {
+      "id": "I12",
+      "raised_by": [
+        "ats"
+      ],
+      "n_reviewers": 1,
+      "max_severity": 1,
+      "sum_severity": 1,
+      "sum_confidence": 3,
+      "first_stage": 1,
+      "category": "gaps",
+      "scope": "section",
+      "quote": "Bachelor in Applied Computer Science (2016 - 2019)",
+      "problem": "The institution is missing, so the degree cannot be verified or matched by an ATS. The freelance period ends in 2020 and the current job starts in 2021, which leaves an unexplained gap.",
+      "fix": "Add the school name and city. Add a short note or adjust the dates so 2020-2021 is accounted for. Use one date format throughout instead of mixing years and MM/YYYY.",
+      "members": [
+        {
+          "agent": "ats",
+          "quote": "Bachelor in Applied Computer Science (2016 - 2019)",
+          "problem": "The institution is missing, so the degree cannot be verified or matched by an ATS. The freelance period ends in 2020 and the current job starts in 2021, which leaves an unexplained gap.",
+          "fix": "Add the school name and city. Add a short note or adjust the dates so 2020-2021 is accounted for. Use one date format throughout instead of mixing years and MM/YYYY.",
+          "severity": 1,
+          "category": "gaps",
+          "scope": "section"
+        }
+      ],
+      "score": 1
+    }
+  ],
+  "strengths": [
+    {
+      "agent": "hm",
+      "quote": "Contributed to a React design system used by the whole team",
+      "why": "Five years at one company in React and TypeScript, with design system work, performance work and mentoring, is the core mid-level frontend profile. That is stronger than most of the pile, which is mainly React and TypeScript with no shared-component or performance evidence. If the numbers get filled in, this is worth 30 minutes."
+    },
+    {
+      "agent": "ceo",
+      "quote": "React design system used by the whole team",
+      "why": "It names a concrete, widely adopted internal product and the exact stack for a frontend role. It signals work that other developers depend on. It becomes strong once the contribution and adoption numbers are added."
+    },
+    {
+      "agent": "lead",
+      "quote": "improved the performance of the main web app",
+      "why": "Web performance work on the main product is the kind of user-visible, measurable result a team lead hires frontend people for. Once the before/after metric is filled in, this line shows ownership and impact and separates the candidate from applicants who only list frameworks."
+    },
+    {
+      "agent": "peer",
+      "quote": "Frontend developer working with React, TypeScript and CSS/Sass, at Brightwave Digital in Gent since 2021.",
+      "why": "The opening line gives title, core stack, employer, city and tenure in one sentence, and it matches a typical Frontend Developer posting. A screener sees at once that the stack fits and that the candidate has about five years at one company."
+    },
+    {
+      "agent": "hr",
+      "quote": "Frontend developer working with React, TypeScript and CSS/Sass, at Brightwave Digital in Gent since 2021.",
+      "why": "The first line gives a recruiter the title, core stack, current employer and location straight away. It matches the target role and passes the 8-second skim."
+    },
+    {
+      "agent": "applicant",
+      "quote": "Frontend developer working with React, TypeScript and CSS/Sass, at Brightwave Digital in Gent since 2021.",
+      "why": "It names the role, the core stack that matches a typical Frontend Developer posting, the employer, the city and the tenure in one line, so a screener can place the candidate in seconds."
+    }
+  ],
+  "ats": {
+    "result": "PASS",
+    "knockouts": [
+      {
+        "requirement": "Bachelor's degree in IT or a related field",
+        "status": "met",
+        "evidence_quote": "Bachelor in Applied Computer Science (2016 - 2019)"
+      },
+      {
+        "requirement": "Roughly 2-3+ years of professional frontend experience",
+        "status": "met",
+        "evidence_quote": "Frontend Developer, Brightwave Digital, Gent (2021 - present)"
+      },
+      {
+        "requirement": "Based in or able to work in Belgium (Gent area)",
+        "status": "met",
+        "evidence_quote": "Frontend Developer, Brightwave Digital, Gent (2021 - present)"
+      },
+      {
+        "requirement": "Dutch and English working proficiency, stated on the CEFR scale",
+        "status": "unclear",
+        "evidence_quote": null
+      }
+    ],
+    "keywords": {
+      "source": "role_typical",
+      "found": [
+        "React",
+        "TypeScript",
+        "JavaScript",
+        "HTML",
+        "CSS",
+        "Sass",
+        "Vue",
+        "Node.js",
+        "design systems",
+        "web performance",
+        "code reviews",
+        "SEO"
+      ],
+      "missing_required": [
+        "version control (Git)",
+        "unit testing",
+        "REST API integration",
+        "cross-browser compatibility"
+      ],
+      "missing_preferred": [
+        "web accessibility",
+        "continuous integration",
+        "state management",
+        "end-to-end testing",
+        "Storybook"
+      ]
+    }
+  },
+  "discards": [],
+  "no_decision": []
+}
